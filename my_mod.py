@@ -4,6 +4,8 @@
 
 import pandas as pd
 import numpy as np
+import torch
+import copy
 
 
 def getXY(seq:pd.Series, n_lags:int):
@@ -56,3 +58,85 @@ def getMultiDXY(df: pd.DataFrame, n_lags=int):
 
     return np.array(x), np.array(y)
 
+def get_testXY(region_df:pd.DataFrame, n_steps:int, n_lags:int):
+    return getMultiDXY(region_df.tail(n_steps+2), n_lags=n_lags)
+
+def pred_next_n(x, model, n_steps:int):
+    """Note: n_steps must be greater than or equals to 4
+        Function that predicts the next N time steps using a given model"""
+
+    x_test = copy.deepcopy(x)
+    
+    model.eval()
+    prediction = []
+    batch_size = 1  
+    iterations = n_steps-2
+    for i in range(iterations):
+        preds = model(torch.tensor(x_test[batch_size*i:batch_size*(i+1)]).float()).detach().numpy()
+        preds = preds.reshape(1,20)
+        x_test[(i+1)][1]=preds
+        x_test[(i+2)][0]=preds
+        prediction.append(preds)
+
+    third_pred = model(torch.tensor(x_test[-1]).float()).detach().numpy().reshape(1,20)
+    x_test[-1][1]=third_pred
+    prediction.append(third_pred)
+
+    fourth_pred = model(torch.tensor(x_test[-1]).float()).detach().numpy().reshape(1,20)
+    prediction.append(fourth_pred)
+    
+    return prediction
+
+
+def metrics_mse(pred, truth):
+    from sklearn.metrics import mean_squared_error
+    for i in range(len(pred)):
+        y_true = truth[i]
+        y_pred = pred[i].reshape(20)
+        print(mean_squared_error(y_true, y_pred))
+
+
+
+
+
+
+
+#---------util functions for full-scale production below---------
+
+def prod_pred_next_n(last_n_rows, model, n_steps=4):
+
+    tmp_stack = np.zeros(shape=(20))
+    print("1")
+    tmp_stack = np.vstack((tmp_stack, last_n_rows.to_numpy()[0]))
+    print("2")
+    tmp_stack = np.vstack((tmp_stack, last_n_rows.to_numpy()[1]))
+    print("3")
+    tmp_stack=np.delete(tmp_stack, 0, axis=0)
+    print("4")
+    print(tmp_stack.shape)
+    model.eval()
+    prediction = []
+    #batch_size = 1
+
+    for i in range(n_steps):
+        preds = model(torch.tensor(tmp_stack[i:(i+1)]).float()).detach().numpy()
+        preds = preds.reshape(20)
+        print(preds)
+        tmp_stack = np.vstack((tmp_stack, preds))
+        prediction.append(preds)
+
+    return prediction
+
+
+
+    
+
+
+
+
+
+
+def generate_full_pred():
+
+
+    return
