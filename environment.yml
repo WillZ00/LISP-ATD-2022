@@ -6,7 +6,8 @@ channels: #might need to add additional channels
 dependencies:
   # Stuff specific to our forecaster
   - pytorch
-  - cudatoolkit=11.3
+  - cpuonly
+  - torchvision
   # From atd2022
   # Core
   - python>=3.9,<3.10
