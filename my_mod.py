@@ -119,7 +119,9 @@ def prod_pred_next_n(last_n_rows, model, n_steps=4):
     #batch_size = 1
 
     for i in range(n_steps):
-        preds = model(torch.tensor(tmp_stack[i:(i+1)]).float()).detach().numpy()
+        tmp_2d_arr = tmp_stack[-2:]
+        tmp_3d_arr = tmp_2d_arr.reshape(1,tmp_2d_arr[0].shape[0], tmp_2d_arr[0].shape[1])
+        preds = model(torch.tensor(tmp_3d_arr).float()).detach().numpy()
         preds = preds.reshape(20)
         print(preds)
         tmp_stack = np.vstack((tmp_stack, preds))
