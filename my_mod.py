@@ -106,21 +106,16 @@ def metrics_mse(pred, truth):
 def prod_pred_next_n(last_n_rows, model, n_steps=4):
 
     tmp_stack = np.zeros(shape=(20))
-    print("1")
     tmp_stack = np.vstack((tmp_stack, last_n_rows.to_numpy()[0]))
-    print("2")
     tmp_stack = np.vstack((tmp_stack, last_n_rows.to_numpy()[1]))
-    print("3")
     tmp_stack=np.delete(tmp_stack, 0, axis=0)
-    print("4")
-    print(tmp_stack.shape)
     model.eval()
     prediction = []
     #batch_size = 1
 
     for i in range(n_steps):
         tmp_2d_arr = tmp_stack[-2:]
-        tmp_3d_arr = tmp_2d_arr.reshape(1,tmp_2d_arr[0].shape[0], tmp_2d_arr[0].shape[1])
+        tmp_3d_arr = tmp_2d_arr.reshape(1,tmp_2d_arr.shape[0], tmp_2d_arr.shape[1])
         preds = model(torch.tensor(tmp_3d_arr).float()).detach().numpy()
         preds = preds.reshape(20)
         print(preds)
