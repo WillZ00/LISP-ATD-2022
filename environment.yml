@@ -1,4 +1,4 @@
-name: BU-LISP
+name: LISP-ATD-2022
 channels:
   - pytorch-nightly
   - conda-forge
