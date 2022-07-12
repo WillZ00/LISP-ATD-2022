@@ -39,6 +39,6 @@ dependencies:
   # atd2022 and our local package
   - pip>=22.0.4
   - pip:
-    - git+https://gitlab.com/algorithms-for-threat-detection/2022/atd2022.git  # install atd2022 from Gitlab (https)
-    #- git+ssh://git@gitlab.com/algorithms-for-threat-detection/2022/atd2022.git  # install atd2022 from Gitlab (ssh)
-   # - -e .[all]  # install our local arlpsu_ml package in editable mode (so it's easy to make changes)
+    #- git+https://gitlab.com/algorithms-for-threat-detection/2022/atd2022.git  # install atd2022 from Gitlab (https)
+    - git+ssh://git@gitlab.com/algorithms-for-threat-detection/2022/atd2022.git  # install atd2022 from Gitlab (ssh)
+    - -e .[all]  # install our local arlpsu_ml package in editable mode (so it's easy to make changes)
