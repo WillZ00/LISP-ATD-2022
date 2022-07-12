@@ -37,5 +37,5 @@ dependencies:
   - pip:
   - git+https://gitlab.com/algorithms-for-threat-detection/2022/atd2022.git  # install atd2022 from Gitlab (https)
   #- git+ssh://git@gitlab.com/algorithms-for-threat-detection/2022/atd2022.git  # install atd2022 from Gitlab (ssh)
-  - -e .[all] #install local BU-LISP packages in editable mode
+ # - -e .[all] #install local BU-LISP packages in editable mode
 prefix: C:\Users\Work Space\anaconda3\envs\atd2022 #not sure if needed
