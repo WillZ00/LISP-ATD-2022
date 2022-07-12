@@ -1,4 +1,4 @@
-###Installation
+### Installation
 To create a conda environment containing the necessary software to run the example forecasters, you will need to run one of the following two commands, depending on your system's platform (operating system and CPU instruction set).
 Note: You may need to toggle which line is commented between lines 43/44 in environment.yml (or lines 42/43 in environment_osx-arm64.yml), depending on whether you authenticate to Gitlab using ssh or https.
 If you are running an x64 processor in Windows, Linux, or OSX, run:
@@ -21,7 +21,7 @@ Finally, you will need to create a Jupyter kernel to use your environment within
 python -m ipykernel install --name LISP-ATD-2022 --user
 
 
-###Below is an overview of the purposes of each file in this repo:
+### Below is an overview of the purposes of each file in this repo:
 
 my_mod.py -- our customized python module that supports our prediction pipeline. (The pre-configed model is located at the bottom of the file)
 
