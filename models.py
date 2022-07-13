@@ -13,7 +13,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 @dataclass
 class CnnForecaster:
-    training_epochs: int = 1
+    training_epochs: int = 800
 
     def fit(self, data: pd.DataFrame(), past_covariates=None) -> "CnnForecaster":
         full_df=data
@@ -32,7 +32,7 @@ class CnnForecaster:
             criterion = nn.MSELoss()
             train = util.myDataset(x_train,y_train)
             train_loader = torch.utils.data.DataLoader(train,batch_size=1,shuffle=False)
-            training_epochs = 1
+            training_epochs = 800
             epochs = training_epochs
 
             self.training_df = data
