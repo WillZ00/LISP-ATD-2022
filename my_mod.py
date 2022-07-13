@@ -131,6 +131,10 @@ def prod_pred_next_n(last_n_rows, model, n_steps=4):
 
 
 
+
+
+
+
 def generate_region_pred(region_df:pd.DataFrame, n_lags:int, epochs:int):
     x,y = getMultiDXY(region_df, n_lags=n_lags)
     y_train=y
@@ -152,6 +156,7 @@ def generate_region_pred(region_df:pd.DataFrame, n_lags:int, epochs:int):
     pred = prod_pred_next_n(res, model)
 
     return pred
+
 
 
 
@@ -178,6 +183,14 @@ def generate_full_pred(full_df:pd.DataFrame, n_epochs=200):
     final = pd.concat(pred_lst, axis=1)
     return final
 
+def pre_trained_region_pred(model, region_df:pd.DataFrame, n_lags=2):
+    x,y = getMultiDXY(region_df, n_lags=n_lags)
+    y_train=y
+    n_features = 20
+    x_train=x.reshape((x.shape[0], x.shape[1], n_features))
+    res = region_df.tail(2)
+    pred = prod_pred_next_n(res, model)
+    return pred
 
 
 
@@ -186,7 +199,7 @@ import torch
 from torch import nn
 from torch.utils.data import Dataset,DataLoader
 import gc
-device=torch.device("cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class CNN_ForecastNet(nn.Module):
     def __init__(self):
@@ -245,3 +258,7 @@ def Train(model, optimizer, train_loader, criterion):
     train_losses.append(train_loss.detach().numpy())
     
     print(f'train_loss {train_loss}')
+
+
+
+
