@@ -42,6 +42,7 @@ class Dataset_ETT_hour(Dataset):
         self.data_path = data_path
         self.__read_data__()
 
+    # Need to modify
     def __read_data__(self):
         self.scaler = StandardScaler()
         df_raw = pd.read_csv(os.path.join(self.root_path,
