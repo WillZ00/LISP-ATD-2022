@@ -381,14 +381,13 @@ class Dataset_Pred(Dataset):
         return self.scaler.inverse_transform(data)
 
 
+
+
 class atdDataset(Dataset):
     def __init__(self, flag='train', size=None, 
-                 features='S',target='OT', scale=True, inverse=False, timeenc=0, freq='h', cols=None):
+                 inverse=False, timeenc=0, freq='w', cols=None):
         # size [seq_len, label_len, pred_len]
         # info
-
-        
-
 
         if size == None:
             self.seq_len = 24*4*4
@@ -403,9 +402,9 @@ class atdDataset(Dataset):
         type_map = {'train':0, 'val':1, 'test':2}
         self.set_type = type_map[flag]
         
-        self.features = features
-        self.target = target
-        self.scale = scale
+        #self.features = features
+        #self.target = target
+        #self.scale = scale
         self.inverse = inverse
         self.timeenc = timeenc
         self.freq = freq
@@ -419,14 +418,11 @@ class atdDataset(Dataset):
 
         #self.scaler = StandardScaler()
 
-    
-
         # border shape = [#train, #Vali, #Test]
-        border1s = [0]
-        border2s = [180]
+        border1s = [0, 180-self.seq_len, 180-self.seq_len]
+        border2s = [180, 215, 215]
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
-        
 
         
         cols_data=df_raw.columns[1:]
@@ -443,9 +439,8 @@ class atdDataset(Dataset):
         df_stamp = df_raw[['timeStamps']][border1:border2]
         df_stamp["timeStamps"]=df_stamp["timeStamps"].dt.to_timestamp('s')
         df_stamp['date'] = pd.to_datetime(df_stamp.timeStamps)
-        
         data_stamp = time_features(df_stamp, timeenc=self.timeenc, freq=self.freq)
-
+        
         self.data_x = data[border1:border2]
         if self.inverse:
             self.data_y = df_data.values[border1:border2]
