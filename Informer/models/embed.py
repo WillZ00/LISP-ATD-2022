@@ -28,7 +28,7 @@ class TokenEmbedding(nn.Module):
         super(TokenEmbedding, self).__init__()
         padding = 1 if torch.__version__>='1.5.0' else 2
 
-        #print(""c_in, d_model)
+        #print("c_in", c_in, d_model)
 
         self.tokenConv = nn.Conv1d(in_channels=c_in, out_channels=d_model, 
                                     kernel_size=3, padding=padding, padding_mode='circular')
@@ -38,7 +38,7 @@ class TokenEmbedding(nn.Module):
 
     def forward(self, x):
         #print(type(self.tokenConv))
-        print(x.size())
+        #print(x.size())
         
         x = self.tokenConv(x.permute(0, 2, 1)).transpose(1,2)
         return x

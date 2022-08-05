@@ -113,8 +113,8 @@ class ATD_Informer(Exp_Basic):
         test_data, test_loader = self._get_data(flag = 'test')
 
 
-        print(len(train_loader))
-        print(len(vali_loader))
+        #print(len(train_loader))
+        #print(len(vali_loader))
 
         path = os.path.join(self.args.checkpoints, setting)
         if not os.path.exists(path):
