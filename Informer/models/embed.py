@@ -117,6 +117,9 @@ class DataEmbedding(nn.Module):
     
 
     def forward(self, x, x_mark):
+        print("ln1",x.shape, x_mark.shape)
+        print("ln2",self.value_embedding(x).shape, self.position_embedding(x).shape, self.temporal_embedding(x_mark).shape, )
         x = self.value_embedding(x) + self.position_embedding(x) + self.temporal_embedding(x_mark)
+        #print(x.shape, x_mark.shape)
         
         return self.dropout(x)

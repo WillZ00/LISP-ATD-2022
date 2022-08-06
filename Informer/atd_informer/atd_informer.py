@@ -6,9 +6,10 @@ from torch import optim
 import os
 import time
 
-from data.data_loader import atdDataset
+from data.data_loader import atdDataset, atd_Pred
 from atd_informer.exp_basic import Exp_Basic
 from models.model import Informer
+
 
 from utils.tools import EarlyStopping, adjust_learning_rate
 from utils.metrics import metric
@@ -56,13 +57,17 @@ class ATD_Informer(Exp_Basic):
         Data = atdDataset
         timeenc = 0 if args.embed!='timeF' else 1
 
+
+        #Note: Shuffle_flag determines if the data is fed in sequentially
+
         if flag == 'test':
             shuffle_flag = False; drop_last = True; batch_size = args.batch_size; freq=args.freq
-        #elif flag=='pred':
-            #shuffle_flag = False; drop_last = False; batch_size = 1; freq=args.detail_freq
-            #Data = Dataset_Pred
+        elif flag=='pred':
+            shuffle_flag = False; drop_last = False; batch_size = 1; freq=args.detail_freq
+            self.args.freq="W"
+            Data = atd_Pred
         else:
-            shuffle_flag = True; drop_last = True; batch_size = args.batch_size; freq=args.freq
+            shuffle_flag = False; drop_last = True; batch_size = args.batch_size; freq=args.freq
         data_set = Data(
             #root_path=args.root_path,
             #data_path=args.data_path,
@@ -72,11 +77,11 @@ class ATD_Informer(Exp_Basic):
             #target=args.target,
             inverse=args.inverse,
             timeenc=timeenc,
-            freq=freq,
+            freq=self.args.freq,
             cols=args.cols
         )
 
-        print(flag, len(data_set))
+        #print(flag, len(data_set))
         data_loader=DataLoader(
             data_set,
             batch_size=batch_size,
@@ -217,8 +222,9 @@ class ATD_Informer(Exp_Basic):
         return
 
     def predict(self, setting, load=False):
+
         pred_data, pred_loader = self._get_data(flag='pred')
-        
+
         if load:
             path = os.path.join(self.args.checkpoints, setting)
             best_model_path = path+'/'+'checkpoint.pth'
