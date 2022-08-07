@@ -124,8 +124,11 @@ class DataEmbedding(nn.Module):
         #print(x)
         #print(cnt)
 
-        print("ln2",self.value_embedding(x).shape, self.position_embedding(x).shape, self.temporal_embedding(x_mark).shape, )
-        x = self.value_embedding(x) + self.position_embedding(x) + self.temporal_embedding(x_mark)
+        print("ln2",self.value_embedding(x).shape, self.position_embedding(x).shape, self.temporal_embedding(x_mark).shape)
+        if (self.value_embedding(x).shape != self.temporal_embedding(x_mark).shape):
+            x=self.value_embedding(x) + self.position_embedding(x)
+        else:
+            x = self.value_embedding(x) + self.position_embedding(x) + self.temporal_embedding(x_mark)
         #print(x.shape, x_mark.shape)
         
         return self.dropout(x)

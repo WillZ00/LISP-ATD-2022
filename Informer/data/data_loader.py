@@ -65,6 +65,8 @@ class atdDataset(Dataset):
 
         
         cols_data=df_raw.columns[1:]
+        
+
         df_data = df_raw[cols_data]
 
         #if self.scale:
@@ -164,7 +166,7 @@ class atd_Pred(Dataset):
         df_raw.columns: ['date', ...(other features), target feature]
         '''
 
-        border1 = len(df_raw)-self.seq_len
+        border1 = len(df_raw)-30
         border2 = len(df_raw)
         
         cols_data=df_raw.columns[1:]
@@ -184,6 +186,12 @@ class atd_Pred(Dataset):
         else:
             self.data_y = data[border1:border2]
         self.data_stamp = data_stamp
+
+        print("check data_x shape",self.data_x.shape)
+        print("check data_y shape",self.data_y.shape)
+
+        print("data_x", self.data_x)
+        print("data_y", self.data_y)
     
     def __getitem__(self, index):
 
