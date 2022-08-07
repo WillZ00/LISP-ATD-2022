@@ -99,10 +99,12 @@ class TimeFeatureEmbedding(nn.Module):
     def forward(self, x):
         return self.embed(x)
 
+
 class DataEmbedding(nn.Module):
+
     def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
         super(DataEmbedding, self).__init__()
-
+        
         #print(dropout)
         #print(type(dropout))
 
@@ -117,7 +119,11 @@ class DataEmbedding(nn.Module):
     
 
     def forward(self, x, x_mark):
+        print("triggered")
         print("ln1",x.shape, x_mark.shape)
+        #print(x)
+        #print(cnt)
+
         print("ln2",self.value_embedding(x).shape, self.position_embedding(x).shape, self.temporal_embedding(x_mark).shape, )
         x = self.value_embedding(x) + self.position_embedding(x) + self.temporal_embedding(x_mark)
         #print(x.shape, x_mark.shape)

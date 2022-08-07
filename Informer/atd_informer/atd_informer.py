@@ -63,7 +63,7 @@ class ATD_Informer(Exp_Basic):
         if flag == 'test':
             shuffle_flag = False; drop_last = True; batch_size = args.batch_size; freq=args.freq
         elif flag=='pred':
-            shuffle_flag = False; drop_last = False; batch_size = 1; freq=args.detail_freq
+            shuffle_flag = False; drop_last = True; batch_size = 1; freq=args.detail_freq
             self.args.freq="W"
             Data = atd_Pred
         else:
@@ -255,16 +255,23 @@ class ATD_Informer(Exp_Basic):
         batch_x = batch_x.float().to(self.device)
         batch_y = batch_y.float()
 
+
         batch_x_mark = batch_x_mark.float().to(self.device)
         batch_y_mark = batch_y_mark.float().to(self.device)
+    
+        print("bxm-shape",batch_x.shape, batch_x_mark.shape, batch_y.shape, batch_y_mark.shape)
 
         # decoder input
         if self.args.padding==0:
             dec_inp = torch.zeros([batch_y.shape[0], self.args.pred_len, batch_y.shape[-1]]).float()
+            print("dec_inp_pre", dec_inp.shape)
         elif self.args.padding==1:
             dec_inp = torch.ones([batch_y.shape[0], self.args.pred_len, batch_y.shape[-1]]).float()
+            print("dec_inp_pre", dec_inp.shape)
         dec_inp = torch.cat([batch_y[:,:self.args.label_len,:], dec_inp], dim=1).float().to(self.device)
         # encoder - decoder
+
+        print("dec_inp_post", dec_inp.shape)
         if self.args.use_amp:
             with torch.cuda.amp.autocast():
                 if self.args.output_attention:

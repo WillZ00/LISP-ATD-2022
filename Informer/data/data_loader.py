@@ -56,7 +56,7 @@ class atdDataset(Dataset):
         #border2 = border2s[self.set_type]
 
         num_train = int(len(df_raw)*0.7)
-        num_test = int(len(df_raw)*0.2)
+        num_test = int(len(df_raw)*0.1)
         num_vali = len(df_raw) - num_train - num_test
         border1s = [0, num_train-self.seq_len, len(df_raw)-num_test-self.seq_len]
         border2s = [num_train, num_train+num_vali, len(df_raw)]
@@ -74,6 +74,7 @@ class atdDataset(Dataset):
         #else:
         #    data = df_data.values
         data = df_data.values
+
 
         df_stamp = df_raw[['timeStamps']][border1:border2]
         df_stamp["timeStamps"]=df_stamp["timeStamps"].dt.to_timestamp('W')
@@ -98,7 +99,11 @@ class atdDataset(Dataset):
 
         seq_x = self.data_x[s_begin:s_end]
 
-        #print("dim:", seq_x.shape)
+        #print("dim:", seq_x.shape, )
+
+        print("pairs", s_begin, s_end)
+        print("y_pairs", r_begin, r_end)
+
 
 
         if self.inverse:
@@ -107,6 +112,9 @@ class atdDataset(Dataset):
             seq_y = self.data_y[r_begin:r_end]
         seq_x_mark = self.data_stamp[s_begin:s_end]
         seq_y_mark = self.data_stamp[r_begin:r_end]
+
+        print("dim:", seq_x.shape, seq_x_mark.shape)
+
 
         #print("x_mark", seq_x_mark)
         #print("y_mark", seq_y_mark)
@@ -178,10 +186,19 @@ class atd_Pred(Dataset):
         self.data_stamp = data_stamp
     
     def __getitem__(self, index):
+
+        
         s_begin = index
         s_end = s_begin + self.seq_len
+
+
         r_begin = s_end - self.label_len
         r_end = r_begin + self.label_len + self.pred_len
+
+        print("check_indices", s_begin, s_end, r_begin, r_end)
+
+
+        print("check_r_sizes", r_begin, r_end, self.label_len, self.pred_len)
 
         seq_x = self.data_x[s_begin:s_end]
         if self.inverse:
@@ -190,11 +207,14 @@ class atd_Pred(Dataset):
             seq_y = self.data_y[r_begin:r_begin+self.label_len]
         seq_x_mark = self.data_stamp[s_begin:s_end]
         seq_y_mark = self.data_stamp[r_begin:r_end]
+        print("x,y", seq_x, seq_y, seq_x_mark, seq_y_mark)
 
         
 
         #print("seq", seq_x.shape)
         #print("mark",seq_x_mark.shape)
+
+        print("check sizes", seq_x.shape, seq_y.shape, seq_x_mark.shape, seq_y_mark.shape)
 
         return seq_x, seq_y, seq_x_mark, seq_y_mark
     
