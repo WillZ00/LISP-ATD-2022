@@ -39,6 +39,7 @@ class atdDataset(Dataset):
         self.inverse = inverse
         self.timeenc = timeenc
         self.freq = freq
+        self.cols = cols
 
         self.__read_data__()
 
@@ -64,7 +65,7 @@ class atdDataset(Dataset):
         border2 = border2s[self.set_type]
 
         
-        cols_data=df_raw.columns[1:]
+        cols_data=df_raw.columns[self.cols:self.cols+20]
         
 
         df_data = df_raw[cols_data]
@@ -103,8 +104,8 @@ class atdDataset(Dataset):
 
         #print("dim:", seq_x.shape, )
 
-        print("pairs", s_begin, s_end)
-        print("y_pairs", r_begin, r_end)
+        #print("pairs", s_begin, s_end)
+        #print("y_pairs", r_begin, r_end)
 
 
 
@@ -115,7 +116,7 @@ class atdDataset(Dataset):
         seq_x_mark = self.data_stamp[s_begin:s_end]
         seq_y_mark = self.data_stamp[r_begin:r_end]
 
-        print("dim:", seq_x.shape, seq_x_mark.shape)
+        #print("dim:", seq_x.shape, seq_x_mark.shape)
 
 
         #print("x_mark", seq_x_mark)
@@ -153,6 +154,7 @@ class atd_Pred(Dataset):
         self.inverse = inverse
         self.timeenc = timeenc
         self.freq = freq
+        self.cols = cols
     
         #self.cols=cols
         #self.root_path = root_path
@@ -169,7 +171,9 @@ class atd_Pred(Dataset):
         border1 = len(df_raw)-30
         border2 = len(df_raw)
         
-        cols_data=df_raw.columns[1:]
+        #cols_data=df_raw.columns[1:]
+
+        cols_data=df_raw.columns[self.cols:self.cols+20]
         df_data = df_raw[cols_data]
 
 
@@ -187,11 +191,11 @@ class atd_Pred(Dataset):
             self.data_y = data[border1:border2]
         self.data_stamp = data_stamp
 
-        print("check data_x shape",self.data_x.shape)
-        print("check data_y shape",self.data_y.shape)
+        #print("check data_x shape",self.data_x.shape)
+        #print("check data_y shape",self.data_y.shape)
 
-        print("data_x", self.data_x)
-        print("data_y", self.data_y)
+        #print("data_x", self.data_x)
+        #print("data_y", self.data_y)
     
     def __getitem__(self, index):
 
@@ -203,10 +207,10 @@ class atd_Pred(Dataset):
         r_begin = s_end - self.label_len
         r_end = r_begin + self.label_len + self.pred_len
 
-        print("check_indices", s_begin, s_end, r_begin, r_end)
+        #print("check_indices", s_begin, s_end, r_begin, r_end)
 
 
-        print("check_r_sizes", r_begin, r_end, self.label_len, self.pred_len)
+        #print("check_r_sizes", r_begin, r_end, self.label_len, self.pred_len)
 
         seq_x = self.data_x[s_begin:s_end]
         if self.inverse:
@@ -215,14 +219,14 @@ class atd_Pred(Dataset):
             seq_y = self.data_y[r_begin:r_begin+self.label_len]
         seq_x_mark = self.data_stamp[s_begin:s_end]
         seq_y_mark = self.data_stamp[r_begin:r_end]
-        print("x,y", seq_x, seq_y, seq_x_mark, seq_y_mark)
+        #print("x,y", seq_x, seq_y, seq_x_mark, seq_y_mark)
 
         
 
         #print("seq", seq_x.shape)
         #print("mark",seq_x_mark.shape)
 
-        print("check sizes", seq_x.shape, seq_y.shape, seq_x_mark.shape, seq_y_mark.shape)
+        #print("check sizes", seq_x.shape, seq_y.shape, seq_x_mark.shape, seq_y_mark.shape)
 
         return seq_x, seq_y, seq_x_mark, seq_y_mark
     

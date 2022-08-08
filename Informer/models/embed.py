@@ -119,12 +119,12 @@ class DataEmbedding(nn.Module):
     
 
     def forward(self, x, x_mark):
-        print("triggered")
-        print("ln1",x.shape, x_mark.shape)
+        #print("triggered")
+        #print("ln1",x.shape, x_mark.shape)
         #print(x)
         #print(cnt)
 
-        print("ln2",self.value_embedding(x).shape, self.position_embedding(x).shape, self.temporal_embedding(x_mark).shape)
+        #print("ln2",self.value_embedding(x).shape, self.position_embedding(x).shape, self.temporal_embedding(x_mark).shape)
         if (self.value_embedding(x).shape != self.temporal_embedding(x_mark).shape):
             x=self.value_embedding(x) + self.position_embedding(x)
         else:

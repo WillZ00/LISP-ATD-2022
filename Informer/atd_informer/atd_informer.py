@@ -202,10 +202,10 @@ class ATD_Informer(Exp_Basic):
 
         preds = np.array(preds)
         trues = np.array(trues)
-        print('test shape:', preds.shape, trues.shape)
+        #print('test shape:', preds.shape, trues.shape)
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
-        print('test shape:', preds.shape, trues.shape)
+        #print('test shape:', preds.shape, trues.shape)
 
         # result save
         folder_path = './results/' + setting +'/'
@@ -259,19 +259,19 @@ class ATD_Informer(Exp_Basic):
         batch_x_mark = batch_x_mark.float().to(self.device)
         batch_y_mark = batch_y_mark.float().to(self.device)
     
-        print("bxm-shape",batch_x.shape, batch_x_mark.shape, batch_y.shape, batch_y_mark.shape)
+        #print("bxm-shape",batch_x.shape, batch_x_mark.shape, batch_y.shape, batch_y_mark.shape)
 
         # decoder input
         if self.args.padding==0:
             dec_inp = torch.zeros([batch_y.shape[0], self.args.pred_len, batch_y.shape[-1]]).float()
-            print("dec_inp_pre", dec_inp.shape)
+            #print("dec_inp_pre", dec_inp.shape)
         elif self.args.padding==1:
             dec_inp = torch.ones([batch_y.shape[0], self.args.pred_len, batch_y.shape[-1]]).float()
-            print("dec_inp_pre", dec_inp.shape)
+            #print("dec_inp_pre", dec_inp.shape)
         dec_inp = torch.cat([batch_y[:,:self.args.label_len,:], dec_inp], dim=1).float().to(self.device)
         # encoder - decoder
 
-        print("dec_inp_post", dec_inp.shape)
+        #print("dec_inp_post", dec_inp.shape)
         if self.args.use_amp:
             with torch.cuda.amp.autocast():
                 if self.args.output_attention:

@@ -134,7 +134,7 @@ def time_features(dates, timeenc=1, freq='h'):
     *minute returns a number from 0-3 corresponding to the 15 minute period it falls into.
     """
 
-    print("timeenc, freq", timeenc, freq)
+    #print("timeenc, freq", timeenc, freq)
 
     if timeenc==0:
         dates['month'] = dates.date.apply(lambda row:row.month,1)
