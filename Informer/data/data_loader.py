@@ -15,7 +15,7 @@ warnings.filterwarnings('ignore')
 
 
 class atdDataset(Dataset):
-    def __init__(self, flag='train', size=None,
+    def __init__(self, df:pd.DataFrame, flag='train', size=None,
                  inverse=False, timeenc=0, freq='w', cols=None):
         # size [seq_len, label_len, pred_len]
         # info
@@ -40,12 +40,13 @@ class atdDataset(Dataset):
         self.timeenc = timeenc
         self.freq = freq
         self.cols = cols
+        self.df = df
 
         self.__read_data__()
 
     # Need to modify
     def __read_data__(self):
-        df_raw = atd2022.io.read_csv()
+        df_raw = self.df
         df_raw.insert(0, "timeStamps", df_raw.index)
 
         #self.scaler = StandardScaler()
@@ -84,12 +85,20 @@ class atdDataset(Dataset):
         df_stamp['date'] = pd.to_datetime(df_stamp.timeStamps)
         data_stamp = time_features(df_stamp, timeenc=self.timeenc, freq=self.freq)
         
+        #print(self.df)
+
+        self.df = self.df.drop(["timeStamps"], axis=1)
+
+        #print(self.df)
+
         self.data_x = data[border1:border2]
         if self.inverse:
             self.data_y = df_data.values[border1:border2]
         else:
             self.data_y = data[border1:border2]
         self.data_stamp = data_stamp
+
+        #df_raw = df_raw.drop(["timeStamps"], axis=1)
     
     def __getitem__(self, index):
         s_begin = index
@@ -133,7 +142,7 @@ class atdDataset(Dataset):
 
 
 class atd_Pred(Dataset):
-    def __init__(self, flag='train', size=None,
+    def __init__(self, df=pd.DataFrame, flag='train', size=None,
                  inverse=False, timeenc=0, freq='w', cols=None):
         # size [seq_len, label_len, pred_len]
         # info
@@ -148,6 +157,7 @@ class atd_Pred(Dataset):
         # init
         assert flag in ['pred']
         
+        self.df=df
         #self.features = features
         #self.target = target
         #self.scale = scale
@@ -162,14 +172,16 @@ class atd_Pred(Dataset):
         self.__read_data__()
 
     def __read_data__(self):
-        df_raw = atd2022.io.read_csv()
+        df_raw = self.df
         df_raw.insert(0, "timeStamps", df_raw.index)
         '''
         df_raw.columns: ['date', ...(other features), target feature]
         '''
 
-        border1 = len(df_raw)-30
+        border1 = len(df_raw)-5
         border2 = len(df_raw)
+
+        #print()
         
         #cols_data=df_raw.columns[1:]
 
@@ -178,6 +190,8 @@ class atd_Pred(Dataset):
 
 
         data = df_data.values
+
+
 
         df_stamp = df_raw[['timeStamps']][border1:border2]
         df_stamp["timeStamps"]=df_stamp["timeStamps"].dt.to_timestamp('s')
@@ -219,7 +233,8 @@ class atd_Pred(Dataset):
             seq_y = self.data_y[r_begin:r_begin+self.label_len]
         seq_x_mark = self.data_stamp[s_begin:s_end]
         seq_y_mark = self.data_stamp[r_begin:r_end]
-        #print("x,y", seq_x, seq_y, seq_x_mark, seq_y_mark)
+        #print("x,y", seq_x, seq_y)
+
 
         
 

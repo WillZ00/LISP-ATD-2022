@@ -6,6 +6,7 @@ from torch import optim
 import os
 import time
 
+import pandas as pd
 from data.data_loader import atdDataset, atd_Pred
 from atd_informer.exp_basic import Exp_Basic
 from models.model import Informer
@@ -17,10 +18,26 @@ from utils.metrics import metric
 import numpy as np
 
 class ATD_Informer(Exp_Basic):
-    def __init__(self, args):
-        super(ATD_Informer, self).__init__(args)
+    def __init__(self, args, df:pd.DataFrame):
+        super(ATD_Informer, self).__init__(args, df)
+
+
+    def update_df(self, new_row, cols):
+        tmp = self.df.drop(["timeStamps"], axis=1)
+        last_idx=tmp.index[-1]
+        #print(tmp.tail())
+        #print(last_idx)
+        #print(new_row)
+        tmp.loc[last_idx+1] = new_row
+        
+        tmp.insert(0, "timeStamps", tmp.index)
+        self.df = tmp
+        #print(self.df.)
+        #print(self.df.tail())
+
+        return
     
-    def _build_model(self):
+    def _build_model(self, df):
         #print(self.args.dropout)
         #print(type(self.args.dropout))
         model = Informer(
@@ -46,12 +63,19 @@ class ATD_Informer(Exp_Basic):
             self.args.mix,
             self.device
         ).float()
+        self.model = model
+        self.df = df
 
 
 
-        return model
+        return self
     
     def _get_data(self, flag):
+
+        if "timeStamps" in self.df.columns:
+            self.df = self.df.drop(["timeStamps"], axis=1)
+
+        #print(self.df)
         args = self.args
 
         Data = atdDataset
@@ -71,6 +95,7 @@ class ATD_Informer(Exp_Basic):
         data_set = Data(
             #root_path=args.root_path,
             #data_path=args.data_path,
+            df = self.df,
             flag=flag,
             size=[args.seq_len, args.label_len, args.pred_len],
             #features=args.features,
@@ -79,7 +104,7 @@ class ATD_Informer(Exp_Basic):
             timeenc=timeenc,
             freq=self.args.freq,
             cols=args.cols
-        )
+            )
 
         #print(flag, len(data_set))
         data_loader=DataLoader(
@@ -89,6 +114,8 @@ class ATD_Informer(Exp_Basic):
             #num_workers=args.num_workers,
             drop_last=drop_last
         )
+        #self.df = self.df.drop(["timeStamps"], axis=1)
+        
 
         return data_set, data_loader
 
@@ -221,7 +248,7 @@ class ATD_Informer(Exp_Basic):
 
         return
 
-    def predict(self, setting, load=False):
+    def predict(self, setting="None", load=False):
 
         pred_data, pred_loader = self._get_data(flag='pred')
 
@@ -240,6 +267,9 @@ class ATD_Informer(Exp_Basic):
             preds.append(pred.detach().cpu().numpy())
 
         preds = np.array(preds)
+
+        #print(preds.shape)
+        #print(preds)
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         
         # result save
@@ -249,7 +279,7 @@ class ATD_Informer(Exp_Basic):
         
         np.save(folder_path+'real_prediction.npy', preds)
         
-        return
+        return np.squeeze(preds)
 
     def _process_one_batch(self, dataset_object, batch_x, batch_y, batch_x_mark, batch_y_mark):
         batch_x = batch_x.float().to(self.device)

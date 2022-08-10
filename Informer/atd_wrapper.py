@@ -49,10 +49,11 @@ class InformerForcaster:
     args.train_epochs=1
     args.patience=3"""
 
-    def fit(self, past_covariates=None) -> "InformerForcaster":
+    def fit(self, df:pd.DataFrame, past_covariates=None) -> "InformerForcaster":
+        self.df=df
         self.model_list=[]
 
-        for col_index in range(1, 5200, 20):
+        for col_index in range(1, len(df.columns), 20):
             self.args.cols=col_index
             informer = atd_informer.ATD_Informer
             for ii in range(self.args.itr):
@@ -62,7 +63,7 @@ class InformerForcaster:
                 self.args.d_model, self.args.n_heads, self.args.e_layers, self.args.d_layers, self.args.d_ff, self.args.attn, self.args.factor, self.args.embed, self.args.distil, self.args.mix, self.args.des, ii)
 
                 # set experiments
-                exp = informer(self.args)
+                exp = informer(self.args, df)
     
                 # train
                 print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
@@ -80,33 +81,47 @@ class InformerForcaster:
                 
         return self
 
-    def predict():
+    def predict(self):
+        predictions = self.generate_pred()
 
-        return pred
+        #predictions[predictions<0]=0
+        return predictions
 
     
-    def generate_pred(self, full_df:pd.DataFrame):
+    def generate_pred(self):
         model_list = self.model_list
+        if "timeStamps" in self.df.columns:
+            self.df = self.df.drop(["timeStamps"], axis=1)
+        #print("cols",self.df.columns)
 
         name_lst = []
-        for i in range(0,full_df.shape[1],20):
-            name = full_df.columns[i][0]
+        for i in range(0,self.df.shape[1],20):
+            name = self.df.columns[i][0]
             name_lst.append(name)
         current_iter=0
         pred_lst=[]
-        for region_name in name_lst:
-            current_model = model_list[current_iter]
-            region_df = full_df[region_name]
-            pred = util.pre_trained_region_pred(model=current_model, region_df=region_df, n_lags=2)
-            pred = np.round(pred)
+        #print("name_lst_content", name_lst)
+        #print("name_lst_len", len(name_lst))
 
+        for region_name in name_lst:
+            current_mod = model_list[current_iter]
             col_lst=[]
             for i in range(1,21):
                 col=(region_name, i)
                 col_lst.append(col)
-        
             cols=pd.MultiIndex.from_tuples(col_lst)
-            pred_lst.append(pd.DataFrame(data=pred, columns=cols))
-    
-        final = pd.concat(pred_lst, axis=1)
+
+            for j in range(4):
+                current_pred = current_mod.predict()
+                current_pred = np.round(current_pred)
+                current_mod.update_df(current_pred, cols)
+            
+            #print(current_mod.df.tail())
+            pred_lst.append(current_mod.df.drop(["timeStamps"], axis=1).tail(4))
+        
+        final =pd.concat(pred_lst, axis=1)
+
         return final
+            
+            
+            
