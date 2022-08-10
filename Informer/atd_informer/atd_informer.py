@@ -22,12 +22,13 @@ class ATD_Informer(Exp_Basic):
         super(ATD_Informer, self).__init__(args, df)
 
 
-    def update_df(self, new_row, cols):
+    def update_df(self, new_row):
         tmp = self.df.drop(["timeStamps"], axis=1)
         last_idx=tmp.index[-1]
         #print(tmp.tail())
         #print(last_idx)
         #print(new_row)
+        #print(tmp)
         tmp.loc[last_idx+1] = new_row
         
         tmp.insert(0, "timeStamps", tmp.index)

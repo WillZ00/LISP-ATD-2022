@@ -83,8 +83,7 @@ class InformerForcaster:
 
     def predict(self):
         predictions = self.generate_pred()
-
-        #predictions[predictions<0]=0
+        predictions[predictions<=0]=0
         return predictions
 
     
@@ -103,25 +102,29 @@ class InformerForcaster:
         #print("name_lst_content", name_lst)
         #print("name_lst_len", len(name_lst))
 
-        for region_name in name_lst:
-            current_mod = model_list[current_iter]
-            col_lst=[]
-            for i in range(1,21):
-                col=(region_name, i)
-                col_lst.append(col)
-            cols=pd.MultiIndex.from_tuples(col_lst)
+        #for region_name in name_lst:
+            #current_mod = model_list[current_iter]
+            #col_lst=[]
+            #for i in range(1,21):
+            #    col=(region_name, i)
+            #    col_lst.append(col)
+            #cols=pd.MultiIndex.from_tuples(col_lst)
 
-            for j in range(4):
+        for j in range(4):
+            cur_pred_lst = []
+            for k in range(len(model_list)):
+                current_mod=model_list[k]
                 current_pred = current_mod.predict()
                 current_pred = np.round(current_pred)
-                current_mod.update_df(current_pred, cols)
+                cur_pred_lst.append(current_pred)
+            current_mod.update_df(np.concatenate(cur_pred_lst))
             
             #print(current_mod.df.tail())
-            pred_lst.append(current_mod.df.drop(["timeStamps"], axis=1).tail(4))
+        pred_lst.append(current_mod.df.drop(["timeStamps"], axis=1).tail(4))
         
         final =pd.concat(pred_lst, axis=1)
 
         return final
             
-            
+        
             
