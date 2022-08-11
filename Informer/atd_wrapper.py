@@ -70,8 +70,8 @@ class InformerForcaster:
                 exp.train(setting)
     
                 # test
-                print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
-                exp.test(setting)
+                #print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
+                #exp.test(setting)
 
                 print(col_index)
 

@@ -97,6 +97,7 @@ class ATD_Informer(Exp_Basic):
             #root_path=args.root_path,
             #data_path=args.data_path,
             df = self.df,
+            seq_len = args.seq_len,
             flag=flag,
             size=[args.seq_len, args.label_len, args.pred_len],
             #features=args.features,

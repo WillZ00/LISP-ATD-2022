@@ -15,7 +15,7 @@ warnings.filterwarnings('ignore')
 
 
 class atdDataset(Dataset):
-    def __init__(self, df:pd.DataFrame, flag='train', size=None,
+    def __init__(self, df:pd.DataFrame, seq_len, flag='train', size=None,
                  inverse=False, timeenc=0, freq='w', cols=None):
         # size [seq_len, label_len, pred_len]
         # info
@@ -57,8 +57,8 @@ class atdDataset(Dataset):
         #border1 = border1s[self.set_type]
         #border2 = border2s[self.set_type]
 
-        num_train = int(len(df_raw)*0.7)
-        num_test = int(len(df_raw)*0.1)
+        num_train = int(len(df_raw)*0.9)
+        num_test = int(len(df_raw)*0.05)
         num_vali = len(df_raw) - num_train - num_test
         border1s = [0, num_train-self.seq_len, len(df_raw)-num_test-self.seq_len]
         border2s = [num_train, num_train+num_vali, len(df_raw)]
@@ -142,7 +142,7 @@ class atdDataset(Dataset):
 
 
 class atd_Pred(Dataset):
-    def __init__(self, df=pd.DataFrame, flag='train', size=None,
+    def __init__(self, df:pd.DataFrame, seq_len, flag='train', size=None,
                  inverse=False, timeenc=0, freq='w', cols=None):
         # size [seq_len, label_len, pred_len]
         # info
@@ -165,6 +165,7 @@ class atd_Pred(Dataset):
         self.timeenc = timeenc
         self.freq = freq
         self.cols = cols
+        self.seq_len = seq_len
     
         #self.cols=cols
         #self.root_path = root_path
@@ -178,7 +179,7 @@ class atd_Pred(Dataset):
         df_raw.columns: ['date', ...(other features), target feature]
         '''
 
-        border1 = len(df_raw)-5
+        border1 = len(df_raw)-self.seq_len
         border2 = len(df_raw)
 
         #print()
