@@ -20,6 +20,7 @@ import numpy as np
 class ATD_Informer(Exp_Basic):
     def __init__(self, args, df:pd.DataFrame):
         super(ATD_Informer, self).__init__(args, df)
+        self.device = self._acquire_device()
 
 
     def update_df(self, new_row):
@@ -321,4 +322,3 @@ class ATD_Informer(Exp_Basic):
         batch_y = batch_y[:,-self.args.pred_len:,f_dim:].to(self.device)
 
         return outputs, batch_y
-
