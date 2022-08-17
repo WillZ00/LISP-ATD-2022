@@ -13,6 +13,9 @@ for region in data2:
     y = temp_region.values 
     train, test = train_test_split(y, train_size=150)
 
+    
+    
+   
 
     history = [x for x in train]
     predictions = list()
@@ -31,3 +34,16 @@ for region in data2:
         obs = test[t]
         history.append(obs)
         print('predicted=%f, expected=%f' % (yhat, obs))
+        
+        
+def Train(self, data): #not sure about exactly how dataloader would be used here
+    #call to data loader clas
+    #this is just a subfunc to be called for each sequence of evets for each region
+    # i just this this simply would just use model = ARIMA.... and then model fit
+    #would have to return a model object
+    
+def genPred(self, model) #takes as paras model
+#likely using trained model and .forecast to extract the next four predicted events
+#thats what am trying to figure out what I need to use Dougs classes i dont know if he has that funcxtionality for us
+
+def dataExtrapolate(self, data) # perhaps this would just be the main looper through the data frame to then send to trian and gen pred for each event for each region
