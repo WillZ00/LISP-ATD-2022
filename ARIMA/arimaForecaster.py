@@ -7,7 +7,8 @@ from torch import nn
 from torch.utils.data import Dataset,DataLoader
 import gc
 import numpy as np
-from my_mod import CNN_ForecastNet
+#from my_mod import CNN_ForecastNet
+from statsmodels.tsa.arima.model import ARIMA
 
 need to import model here and then 
 
@@ -29,9 +30,16 @@ class arimaForecaster:
             x, y_train = util.getMultiDXY(df=region_df, n_lags=2)
             n_features = 20
             x_train=x.reshape((x.shape[0], x.shape[1], n_features))
+            
+            #up to this is just splitting the data and making is fit for 1d cnn
+            
+            
             #self.model = CNN_ForecastNet().to(device)  # save it for later
+            history = [x for x in x_train] # might be slightly incorreect this how the data was just played with above
+            #might need to be the entire training set
+            self.model = ARIMA(, order =(5,10,0) # x in this case should be the history 
 
-            optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-5)
+            #optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-5)
             criterion = nn.MSELoss()
             train = util.myDataset(x_train,y_train)
             train_loader = torch.utils.data.DataLoader(train,batch_size=1,shuffle=False)
