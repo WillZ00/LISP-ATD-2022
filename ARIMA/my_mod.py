@@ -205,6 +205,7 @@ from torch.utils.data import Dataset,DataLoader
 import gc
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+'''
 class CNN_ForecastNet(nn.Module):
     def __init__(self):
         super(CNN_ForecastNet,self).__init__()
@@ -224,6 +225,8 @@ class CNN_ForecastNet(nn.Module):
         x = self.fc2(x)
         
         return x
+'''
+
 
 class myDataset(Dataset):
     def __init__(self,feature,target):
@@ -239,7 +242,7 @@ class myDataset(Dataset):
         
         return item,label
 
-
+'''
 def Train(model, optimizer, train_loader, criterion):
     train_losses = []
     running_loss = .0
@@ -262,5 +265,4 @@ def Train(model, optimizer, train_loader, criterion):
     train_losses.append(train_loss.detach().numpy())
     
     print(f'train_loss {train_loss}')
-
-
+    '''
