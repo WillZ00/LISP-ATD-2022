@@ -147,7 +147,7 @@ class ATD_Informer(Exp_Basic):
         vali_data, vali_loader = self._get_data(flag = 'val')
         test_data, test_loader = self._get_data(flag = 'test')
 
-
+        
         #print(len(train_loader))
         #print(len(vali_loader))
 

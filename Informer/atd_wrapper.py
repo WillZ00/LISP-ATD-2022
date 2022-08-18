@@ -49,6 +49,7 @@ class InformerForcaster:
     args.train_epochs=1
     args.patience=3"""
 
+    """
     def fit(self, df:pd.DataFrame, past_covariates=None) -> "InformerForcaster":
         self.df=df
         self.model_list=[]
@@ -80,6 +81,12 @@ class InformerForcaster:
 
                 
         return self
+    
+        
+        """
+
+
+
 
     def predict(self):
         predictions = self.generate_pred()
@@ -126,5 +133,45 @@ class InformerForcaster:
 
         return final
             
-        
+
+
+
+    def fit(self, df:pd.DataFrame, past_covariates=None) -> "InformerForcaster":
+        self.df=df
+        self.model_list=[]
+
+        name_lst=[]
+        for i in range(0,self.df.shape[1],20):
+            name = self.df.columns[i][0]
+            name_lst.append(name)
+        col_num=0
+        for name in name_lst:
+            region_df=self.df[name]
+            print(region_df)
+            self.args.cols=col_num
+            informer = atd_informer.ATD_Informer
+            for ii in range(self.args.itr):
+                # setting record of experiments
+                setting = '{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_at{}_fc{}_eb{}_dt{}_mx{}_{}_{}'.format(self.args.model, self.args.data, self.args.features, 
+                self.args.seq_len, self.args.label_len, self.args.pred_len,
+                self.args.d_model, self.args.n_heads, self.args.e_layers, self.args.d_layers, self.args.d_ff, self.args.attn, self.args.factor, self.args.embed, self.args.distil, self.args.mix, self.args.des, ii)
+
+                # set experiments
+                exp = informer(self.args, region_df)
+    
+                # train
+                print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
+                exp.train(setting)
+    
+                # test
+                #print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
+                #exp.test(setting)
+
+                print(col_num)
+
+                if ii==self.args.itr-1:
+                    self.model_list.append(exp)
+            col_num+=1
+        return self
+
             
