@@ -26,6 +26,8 @@ class arimaForecaster:
             name_lst.append(name)
         self.model_list=[]
         for region_name in name_lst:
+            
+            
             region_df = full_df[region_name]
             x, y_train = util.getMultiDXY(df=region_df, n_lags=2)
             n_features = 20
@@ -48,6 +50,9 @@ class arimaForecaster:
 
             self.training_df = data
 
+                               
+                               
+              #dont think this is needed for arima,                  
             for epoch in range(epochs):
                 print('epochs {}/{}'.format(epoch+1,epochs))
                 util.Train(self.model, optimizer, train_loader, criterion)
