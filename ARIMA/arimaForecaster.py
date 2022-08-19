@@ -16,7 +16,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 @dataclass
 class arimaForecaster:
-    training_epochs: int = 800
+   #  training_epochs: int = 800
     
 #fit is where the training is occurring not just fitting data 
     def fit(self, data: pd.DataFrame(), past_covariates=None) -> "arimaForecaster": # dont htink that I would need past covs
@@ -44,24 +44,9 @@ class arimaForecaster:
             #self.model = CNN_ForecastNet().to(device)  # save it for later
             history = [x for x in x_train] # might be slightly incorreect this how the data was just played with above
             #might need to be the entire training set
-            self.model = ARIMA(history, order =(5,1,0) # x in this case should be the history 
+            self.model = ARIMA(history, order =(5,1,0)) # x in this case should be the history 
 
-            #optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-5)
-            #criterion = nn.MSELoss() 
-        #    train = util.myDataset(x_train,y_train)
-     #       train_loader = torch.utils.data.DataLoader(train,batch_size=1,shuffle=False)
-       #     training_epochs = 800
-      #      epochs = training_epochs
-
-      #      self.training_df = data # i also dont think that I will need to reuse this
-         
-              #dont think this is needed for arima,                  
-          #  for epoch in range(epochs):
-            #    print('epochs {}/{}'.format(epoch+1,epochs))
-           #     util.Train(self.model, optimizer, train_loader, criterion)
-           #     gc.collect() #calling to the garbage collector? 
-            
-                self.model_list.append(self.model) # i dont understand what this is doing adding each regions or cols model to the model list 
+            self.model_list.append(self.model) # i dont understand what this is doing adding each regions or cols model to the model list 
         return self
 
 
