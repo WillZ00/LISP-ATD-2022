@@ -10,7 +10,7 @@ import numpy as np
 #from my_mod import CNN_ForecastNet
 from statsmodels.tsa.arima.model import ARIMA
 
-need to import model here and then 
+#need to import model here and then 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
