@@ -25,12 +25,32 @@ for region in data2:
     for t in range(len(test))
         model = ARIMA(history, order=(5,1,0))
         model_fit = model.fit()
-        output = model_fit.forecast()
-       
-        yhat = output[0]
-        if yhat < 0: 
-            yhat = 0
-        predictions.append(yhat)
+        output = model_fit.forecast(4, alpha = 0.01) #can be adjusted 
+  
+        #generate all 4 of the next preds? and then append to 
+        yhat_1 = output[0]
+        yhat_2 = output[1]
+        yhat_3 = output[2]
+        yhat_4 = output[3]
+    
+            
+        if yhat_1 < 0: 
+            yhat_1 = 0
+            
+        elif yhat_2 < 0: 
+            yhat_2 = 0
+            
+        elif yhat_3 < 0: 
+            yhat_3 = 0
+            
+        elif yhat_4 < 0: 
+            yhat_4 = 0
+           
+        
+        
+        predictions.append(yhat_1, yhat_2, yhat_3, yhat_4) # this is just the predicted vals
+        
+        
         obs = test[t]
         history.append(obs)
         print('predicted=%f, expected=%f' % (yhat, obs))
