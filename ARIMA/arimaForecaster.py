@@ -17,48 +17,53 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 @dataclass
 class arimaForecaster:
     training_epochs: int = 800
-
-    def fit(self, data: pd.DataFrame(), past_covariates=None) -> "arimaForecaster":
-        full_df=data
-        name_lst = []
+        
+        
+        
+#fit is where the training is occurring not just fitting data 
+    def fit(self, data: pd.DataFrame(), past_covariates=None) -> "arimaForecaster": # dont htink that I would need past covs
+        full_df=data 
+        name_lst = [] #simply just extracting all regions from the data set
         for i in range(0,full_df.shape[1],20):
             name = full_df.columns[i][0]
             name_lst.append(name)
+            
         self.model_list=[]
+       
         for region_name in name_lst:
             
             
             region_df = full_df[region_name]
+           
+            # i think that ^ this is all i need to can't i just use all the data for training of the data
+            
             x, y_train = util.getMultiDXY(df=region_df, n_lags=2)
             n_features = 20
-            x_train=x.reshape((x.shape[0], x.shape[1], n_features))
+            x_train=x.reshape((x.shape[0], x.shape[1], n_features))  # need to print the reshaping not sure what exactly doing and why has 2 cols.
             
             #up to this is just splitting the data and making is fit for 1d cnn
-            
             
             #self.model = CNN_ForecastNet().to(device)  # save it for later
             history = [x for x in x_train] # might be slightly incorreect this how the data was just played with above
             #might need to be the entire training set
-            self.model = ARIMA(, order =(5,10,0) # x in this case should be the history 
+            self.model = ARIMA(history, order =(5,1,0) # x in this case should be the history 
 
             #optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-5)
-            criterion = nn.MSELoss()
-            train = util.myDataset(x_train,y_train)
-            train_loader = torch.utils.data.DataLoader(train,batch_size=1,shuffle=False)
-            training_epochs = 800
-            epochs = training_epochs
+            #criterion = nn.MSELoss() 
+        #    train = util.myDataset(x_train,y_train)
+     #       train_loader = torch.utils.data.DataLoader(train,batch_size=1,shuffle=False)
+       #     training_epochs = 800
+      #      epochs = training_epochs
 
-            self.training_df = data
-
-                               
-                               
+      #      self.training_df = data # i also dont think that I will need to reuse this
+         
               #dont think this is needed for arima,                  
-            for epoch in range(epochs):
-                print('epochs {}/{}'.format(epoch+1,epochs))
-                util.Train(self.model, optimizer, train_loader, criterion)
-                gc.collect()
+          #  for epoch in range(epochs):
+            #    print('epochs {}/{}'.format(epoch+1,epochs))
+           #     util.Train(self.model, optimizer, train_loader, criterion)
+           #     gc.collect() #calling to the garbage collector? 
             
-            self.model_list.append(self.model)
+                self.model_list.append(self.model) # i dont understand what this is doing adding each regions or cols model to the model list 
         return self
 
 
