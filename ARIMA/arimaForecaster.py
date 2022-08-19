@@ -17,9 +17,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 @dataclass
 class arimaForecaster:
     training_epochs: int = 800
-        
-        
-        
+    
 #fit is where the training is occurring not just fitting data 
     def fit(self, data: pd.DataFrame(), past_covariates=None) -> "arimaForecaster": # dont htink that I would need past covs
         full_df=data 
