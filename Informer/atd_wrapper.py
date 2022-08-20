@@ -88,12 +88,12 @@ class InformerForcaster:
 
 
 
-    def predict(self):
-        predictions = self.generate_pred()
+    def predict(self, indicies):
+        predictions = self.generate_pred(indicies)
         predictions[predictions<=0]=0
         return predictions
 
-    
+    """
     def generate_pred(self):
         model_list = self.model_list
         if "timeStamps" in self.df.columns:
@@ -117,21 +117,36 @@ class InformerForcaster:
             #    col_lst.append(col)
             #cols=pd.MultiIndex.from_tuples(col_lst)
 
-        for j in range(4):
+        #for j in range(4):
+            #cur_pred_lst = []
+            #for k in range(len(model_list)):
+                #current_mod=model_list[k]
+                #current_pred = current_mod.predict()
+                #current_pred = np.round(current_pred)
+                #cur_pred_lst.append(current_pred)
+            #current_mod.update_df(np.concatenate(cur_pred_lst))
+            
+            #print(current_mod.df.tail())
+        for k in range(len(model_list)):
             cur_pred_lst = []
-            for k in range(len(model_list)):
-                current_mod=model_list[k]
+            current_mod=model_list[k]
+            for j in range(4):
+                #current_mod=model_list[k]
                 current_pred = current_mod.predict()
                 current_pred = np.round(current_pred)
                 cur_pred_lst.append(current_pred)
-            current_mod.update_df(np.concatenate(cur_pred_lst))
-            
-            #print(current_mod.df.tail())
-        pred_lst.append(current_mod.df.drop(["timeStamps"], axis=1).tail(4))
+                current_mod.update_df(current_pred)
+
+        
+        for i in range(len(model_list)):
+            current_mod=model_list[i]
+            pred_lst.append(current_mod.df.drop(["timeStamps"], axis=1).tail(4))
+            print(pred_lst)
         
         final =pd.concat(pred_lst, axis=1)
 
         return final
+        """
             
 
 
@@ -147,9 +162,10 @@ class InformerForcaster:
         col_num=0
         for name in name_lst:
             region_df=self.df[name]
-            print(region_df)
+            #print(region_df)
             self.args.cols=col_num
             informer = atd_informer.ATD_Informer
+            #print("got here")
             for ii in range(self.args.itr):
                 # setting record of experiments
                 setting = '{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_at{}_fc{}_eb{}_dt{}_mx{}_{}_{}'.format(self.args.model, self.args.data, self.args.features, 
@@ -173,5 +189,39 @@ class InformerForcaster:
                     self.model_list.append(exp)
             col_num+=1
         return self
+
+    def generate_pred(self, indicies):
+        forecaster_horizon = len(indicies)
+        model_list = self.model_list
+        if "timeStamps" in self.df.columns:
+            self.df = self.df.drop(["timeStamps"], axis=1)
+        #print("cols",self.df.columns)
+
+        name_lst = []
+        for i in range(0,self.df.shape[1],20):
+            name = self.df.columns[i][0]
+            name_lst.append(name)
+        current_iter=0
+        pred_lst=[]
+
+        for k in range(len(model_list)):
+            cur_pred_lst = []
+            current_mod=model_list[k]
+            for j in range(forecaster_horizon):
+                #current_mod=model_list[k]
+                current_pred = current_mod.predict()
+                current_pred = np.round(current_pred)
+                cur_pred_lst.append(current_pred)
+                current_mod.update_df(current_pred)
+
+        
+        for i in range(len(model_list)):
+            current_mod=model_list[i]
+            pred_lst.append(current_mod.df.drop(["timeStamps"], axis=1).tail(forecaster_horizon))
+            #print(pred_lst)
+        
+        final =pd.concat(pred_lst, axis=1)
+
+        return final
 
             
