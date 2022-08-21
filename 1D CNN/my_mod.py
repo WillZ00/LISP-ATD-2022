@@ -243,6 +243,8 @@ def Train(model, optimizer, train_loader, criterion):
     model.train()
     
     for idx, (inputs,labels) in enumerate(train_loader):
+        print(inputs)
+        print(inputs.shape, labels.shape)
         inputs=inputs.to(torch.float32)
         labels=labels.to(torch.float32)
         inputs = inputs.to(device)

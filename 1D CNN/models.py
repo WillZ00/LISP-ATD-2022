@@ -14,9 +14,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #@dataclass
 class CnnForecaster:
 
-    def __init__(self, training_epochs):
-        self.training_epochs = training_epochs
-        #training_epochs: int = 200
+    def __init__(self, args):
+        self.training_epochs = args.epochs
+        self.lr = args.lr
 
 
     def fit(self, data: pd.DataFrame(), past_covariates=None) -> "CnnForecaster":
@@ -34,8 +34,10 @@ class CnnForecaster:
             x, y_train = util.getMultiDXY(df=region_df, n_lags=2)
             n_features = 20
             x_train=x.reshape((x.shape[0], x.shape[1], n_features))
+
+            #print(x_train.shape, y_train.shape)
             self.model = CNN_ForecastNet().to(device)  # save it for later
-            optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-5)
+            optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
             criterion = nn.MSELoss()
             train = util.myDataset(x_train,y_train)
             train_loader = torch.utils.data.DataLoader(train,batch_size=1,shuffle=False)
