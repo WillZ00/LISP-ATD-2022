@@ -121,6 +121,7 @@ def prod_pred_next_n(last_n_rows, model, n_steps=4):
         tmp_2d_arr = tmp_stack[-2:]
         tmp_3d_arr = tmp_2d_arr.reshape(1,tmp_2d_arr.shape[0], tmp_2d_arr.shape[1])
         preds = model(torch.tensor(tmp_3d_arr).to(device).float()).cpu().detach().numpy()
+        #print(preds)
         preds = preds.reshape(20)
         #print(preds)
         tmp_stack = np.vstack((tmp_stack, preds))
@@ -204,16 +205,16 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class CNN_ForecastNet(nn.Module):
     def __init__(self):
         super(CNN_ForecastNet,self).__init__()
-        self.conv1d = nn.Conv1d(2,128,kernel_size=1)
+        self.conv1d = nn.Conv1d(2,512,kernel_size=1)
         self.relu = nn.ReLU(inplace=True)
-        self.fc1 = nn.Linear(128,64)
+        self.fc1 = nn.Linear(512,64)
         self.fc2 = nn.Linear(64,1)
         
     def forward(self,x):
         x = self.conv1d(x)
         x = self.relu(x)
         #print(x.shape)
-        x = x.view(-1,128)
+        x = x.view(-1,512)
         #print(x.shape)
         x = self.fc1(x)
         x = self.relu(x)
@@ -243,8 +244,6 @@ def Train(model, optimizer, train_loader, criterion):
     model.train()
     
     for idx, (inputs,labels) in enumerate(train_loader):
-        print(inputs)
-        print(inputs.shape, labels.shape)
         inputs=inputs.to(torch.float32)
         labels=labels.to(torch.float32)
         inputs = inputs.to(device)
