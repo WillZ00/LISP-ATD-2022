@@ -120,9 +120,9 @@ def prod_pred_next_n(last_n_rows, model, n_steps=4):
     for i in range(n_steps):
         tmp_2d_arr = tmp_stack[-2:]
         tmp_3d_arr = tmp_2d_arr.reshape(1,tmp_2d_arr.shape[0], tmp_2d_arr.shape[1])
-        preds = model(torch.tensor(tmp_3d_arr).float()).detach().numpy()
+        preds = model(torch.tensor(tmp_3d_arr).to(device).float()).cpu().detach().numpy()
         preds = preds.reshape(20)
-        print(preds)
+        #print(preds)
         tmp_stack = np.vstack((tmp_stack, preds))
         prediction.append(preds)
     
@@ -255,10 +255,10 @@ def Train(model, optimizer, train_loader, criterion):
         running_loss += loss
         
     train_loss = running_loss/len(train_loader)
-    train_losses.append(train_loss.detach().numpy())
+    train_losses.append(train_loss.cpu().detach().numpy())
     
     print(f'train_loss {train_loss}')
 
-
+#index = output.cpu().data.numpy().argmax()
 
 

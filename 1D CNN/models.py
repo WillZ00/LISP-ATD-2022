@@ -11,18 +11,25 @@ from my_mod import CNN_ForecastNet
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-@dataclass
+#@dataclass
 class CnnForecaster:
-    training_epochs: int = 800
+
+    def __init__(self, training_epochs):
+        self.training_epochs = training_epochs
+        #training_epochs: int = 200
+
 
     def fit(self, data: pd.DataFrame(), past_covariates=None) -> "CnnForecaster":
+        training_epochs = self.training_epochs
         full_df=data
         name_lst = []
         for i in range(0,full_df.shape[1],20):
             name = full_df.columns[i][0]
             name_lst.append(name)
         self.model_list=[]
+        current_cnt = 0
         for region_name in name_lst:
+            print(current_cnt)
             region_df = full_df[region_name]
             x, y_train = util.getMultiDXY(df=region_df, n_lags=2)
             n_features = 20
@@ -32,7 +39,7 @@ class CnnForecaster:
             criterion = nn.MSELoss()
             train = util.myDataset(x_train,y_train)
             train_loader = torch.utils.data.DataLoader(train,batch_size=1,shuffle=False)
-            training_epochs = 800
+            #training_epochs = 200
             epochs = training_epochs
 
             self.training_df = data
@@ -43,14 +50,16 @@ class CnnForecaster:
                 gc.collect()
             
             self.model_list.append(self.model)
+            current_cnt+=1
         return self
 
 
-    def predict(self, x: pd.Index) -> pd.DataFrame:
-
+    def predict(self, indicies) -> pd.DataFrame:
         train_df = self.training_df
         predictions = self.generate_pred(full_df=train_df)
         predictions[predictions<0]=0
+        predictions = predictions.set_index(indicies)
+
         return predictions
 
 
