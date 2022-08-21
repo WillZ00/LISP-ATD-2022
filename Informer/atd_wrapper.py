@@ -90,7 +90,11 @@ class InformerForcaster:
 
     def predict(self, indicies):
         predictions = self.generate_pred(indicies)
+        time_idxs=predictions.index
         predictions[predictions<=0]=0
+        predictions = predictions.to_numpy()
+        predictions = pd.DataFrame(data=predictions, index = time_idxs, columns=self.df.columns)
+
         return predictions
 
     """
@@ -198,11 +202,18 @@ class InformerForcaster:
         #print("cols",self.df.columns)
 
         name_lst = []
+        col_lst=[]
         for i in range(0,self.df.shape[1],20):
             name = self.df.columns[i][0]
             name_lst.append(name)
+            
+            for j in range(1,21):
+                col=(name, j)
+                col_lst.append(col)
+
         current_iter=0
         pred_lst=[]
+
 
         for k in range(len(model_list)):
             cur_pred_lst = []
@@ -217,6 +228,8 @@ class InformerForcaster:
         
         for i in range(len(model_list)):
             current_mod=model_list[i]
+            #print("df:",current_mod.df)
+            #print("col_idxs", current_mod.df.columns)
             pred_lst.append(current_mod.df.drop(["timeStamps"], axis=1).tail(forecaster_horizon))
             #print(pred_lst)
         
