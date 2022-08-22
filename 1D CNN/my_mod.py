@@ -203,18 +203,19 @@ import gc
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class CNN_ForecastNet(nn.Module):
-    def __init__(self):
+    def __init__(self, dim=512):
         super(CNN_ForecastNet,self).__init__()
-        self.conv1d = nn.Conv1d(2,512,kernel_size=1)
+        self.dim = dim
+        self.conv1d = nn.Conv1d(2,self.dim,kernel_size=1)
         self.relu = nn.ReLU(inplace=True)
-        self.fc1 = nn.Linear(512,64)
-        self.fc2 = nn.Linear(64,1)
+        self.fc1 = nn.Linear(self.dim,128)
+        self.fc2 = nn.Linear(128,1)
         
     def forward(self,x):
         x = self.conv1d(x)
         x = self.relu(x)
         #print(x.shape)
-        x = x.view(-1,512)
+        x = x.view(-1,self.dim)
         #print(x.shape)
         x = self.fc1(x)
         x = self.relu(x)
@@ -250,6 +251,10 @@ def Train(model, optimizer, train_loader, criterion):
         labels = labels.to(device)
         optimizer.zero_grad(set_to_none = True)
         preds = model(inputs.float())
+        #print("check shapes_prior", preds.shape, labels.shape)
+        #preds = preds.reshape(2, preds.shape[0]//2)
+        preds = preds.reshape(labels.shape[0], labels.shape[1])
+        #print("check shapes_after", preds.shape, labels.shape)
         loss = criterion(preds,labels)
         loss.backward()
         optimizer.step()

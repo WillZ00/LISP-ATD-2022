@@ -17,10 +17,14 @@ class CnnForecaster:
     def __init__(self, args):
         self.training_epochs = args.epochs
         self.lr = args.lr
+        self.batch_size = args.batch_size
+        self.d_model = args.d_model
 
 
     def fit(self, data: pd.DataFrame(), past_covariates=None) -> "CnnForecaster":
         training_epochs = self.training_epochs
+        batch_size = self.batch_size
+        d_model = self.d_model
         full_df=data
         name_lst = []
         for i in range(0,full_df.shape[1],20):
@@ -36,11 +40,12 @@ class CnnForecaster:
             x_train=x.reshape((x.shape[0], x.shape[1], n_features))
 
             #print(x_train.shape, y_train.shape)
-            self.model = CNN_ForecastNet().to(device)  # save it for later
+            self.model = CNN_ForecastNet(dim=d_model).to(device)  # save it for later
             optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
             criterion = nn.MSELoss()
             train = util.myDataset(x_train,y_train)
-            train_loader = torch.utils.data.DataLoader(train,batch_size=1,shuffle=False)
+
+            train_loader = torch.utils.data.DataLoader(train,batch_size=batch_size,shuffle=False)
             #training_epochs = 200
             epochs = training_epochs
 
