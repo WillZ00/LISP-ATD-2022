@@ -6,7 +6,7 @@ import os
 import time
 import numpy as np
 import pandas as pd
-from data.data_loader import atdDataset
+from data.data_loader import atdDataset, atd_Pred
 from model.CoAtNet import CoAtNet
 
 
@@ -38,8 +38,11 @@ class ATD_CoAtNet(object):
         self.device = device
         return device
 
-    def _get_data(self):
-        data_set = atdDataset(df = self.df)
+    def _get_data(self, flag:str):
+        if flag=="train":
+            data_set = atdDataset(df = self.df)
+        else:
+            data_set = atd_Pred(df = self.df)
         data_loader = DataLoader(
             data_set,
             batch_size = self.args.batch_size,
@@ -62,33 +65,62 @@ class ATD_CoAtNet(object):
     def train(self):
         model =self.model
         device = self.device
-        train_loader = self._get_data()
+        train_loader = self._get_data(flag="train")
         time_now = time.time()
         #train_steps = len(train_loader)
 
         model_optim = self._select_optimizer()
         criterion = self._select_criterion()
 
-        train_losses=[]
-
+        #train_loss=[]
+        model.train()
+        running_loss= .0
+        n_step=0
         for epoch in range(self.args.train_epochs):
-            
+            train_loss=[]
             for idx, (inputs, labels) in enumerate(train_loader):
                 inputs=inputs.to(torch.float32)
                 labels=labels.to(torch.float32)
+                inputs = inputs.unsqueeze(dim=1)
+                #labels = labels.unsqueeze(dim=1)
                 inputs = inputs.to(device)
                 labels = labels.to(device)
+                #print('check input/label dim', inputs.shape, labels.shape)
                 model_optim.zero_grad(set_to_none = True)
                 preds = model(inputs.float())
                 #preds = preds.reshape(labels.shape[0], labels.shape[1])
-                print("check shapes_after", preds.shape, labels.shape)
+                #print("check shapes_after", preds.shape, labels.shape)
                 loss = criterion(preds,labels)
+                #print(type(train_loss))
+                train_loss.append(loss.item())
                 loss.backward()
                 model_optim.step()
-                running_loss += loss
-
-            train_loss = running_loss/len(train_loader)
-            train_losses.append(train_loss.cpu().detach().numpy())
+                #running_loss += loss
+            
+            train_loss = np.average(train_loss)
+            #train_losses.append(train_loss.cpu().detach().numpy())
             print(f'train_loss {train_loss}')
 
-        return model
+        return self
+
+    def predict(self):
+        model =self.model
+        device = self.device
+        pred_loader = self._get_data(flag="pred")
+        time_now = time.time()
+
+        model.eval()
+
+        preds = []
+        for idx, (inputs, labels) in enumerate(pred_loader):
+            pred = model(torch.tensor(inputs).to(device).float()).cpu().detach().numpy()
+            print(pred.shape)
+            preds.append(pred)
+        preds=np.array(preds)
+
+        preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
+
+        return np.squeeze(preds)
+
+
+

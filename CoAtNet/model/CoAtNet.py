@@ -11,7 +11,7 @@ class CoAtNet(nn.Module):
         super().__init__()
         self.out_chs=out_chs
         self.maxpool2d=nn.MaxPool2d(kernel_size=2,stride=2)
-        self.maxpool1d = nn.MaxPool1d(kernel_size=2, stride=2)
+        self.maxpool1d = nn.MaxPool1d(kernel_size=1, stride=2)
 
         self.s0=nn.Sequential(
             nn.Conv2d(in_ch,in_ch,kernel_size=3,padding=1),
@@ -51,7 +51,7 @@ class CoAtNet(nn.Module):
             nn.ReLU(),
             nn.Linear(out_chs[4],out_chs[4])
         )
-
+        self.fc1 = nn.Linear(out_chs[4], 20)
 
     def forward(self, x) :
         B,C,H,W=x.shape
@@ -73,6 +73,9 @@ class CoAtNet(nn.Module):
         y=self.maxpool1d(y.permute(0,2,1))
         N=y.shape[-1]
         y=y.reshape(B,self.out_chs[4],int(sqrt(N)),int(sqrt(N)))
+        #print(y.shape)
+        y = y.squeeze()
+        y = self.fc1(y)
 
         return y
 
