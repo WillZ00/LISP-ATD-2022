@@ -11,9 +11,18 @@ class atdDataset():
 
         self.df=df
         self.__read_data__()
-
     
     def __read_data__(self):
         df = self.df
-        data = df.valuess
+        self.data = df.valuess
+
+    def __getitem__(self, index):
+        begin = index
+        train_x = self.data[index, index+20]
+        train_y = self.data[index+20+1]
+        return train_x, train_y
+    
+    def __len__(self):
+        return len(self.data)
+
 
