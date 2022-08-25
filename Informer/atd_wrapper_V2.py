@@ -60,6 +60,11 @@ class InformerForcaster_V2:
         print(pred)
         print(type(pred))
         print(pred.shape)
+
+        for i in range(forecaster_horizon):
+            cur_pred = pred[i]
+            cur_pred = np.round(cur_pred)
+            model.update_df(cur_pred)
         
 
         final = model.df.drop(["timeStamps"], axis=1).tail(forecaster_horizon)
