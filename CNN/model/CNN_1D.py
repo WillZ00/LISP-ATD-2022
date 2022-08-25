@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from torch.utils.data import Dataset,DataLoader
 import gc
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 class CNN_ForecastNet(nn.Module):
     def __init__(self, dim=512):

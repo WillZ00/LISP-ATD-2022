@@ -7,30 +7,49 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class atd_dataset(Dataset):
-    def __init__(self,feature,target):
-        self.feature = feature
-        self.target = target
-    
+    def __init__(self, df:pd.DataFrame, history_len=52):
+        self.df=df
+        self.history_len = history_len
+        self.__read_data__()
+
+
     def __len__(self):
-        return len(self.feature)
+        return len(self.data)-self.history_len-1
+
+    def __read_data__(self):
+        df = self.df
+        self.data = df
+
     
     def __getitem__(self,idx):
-        item = self.feature[idx]
-        label = self.target[idx]
+        df = self.df
+        history_len = self.history_len
         
-        return item,label
+        begin = idx
+        train_x = self.data[begin:begin+history_len]
+        train_y = self.data[begin+history_len:begin+history_len+1]
+
+        return train_x, train_y
 
 
 class atd_Pred(Dataset):
-    def __init__(self,feature,target):
-        self.feature = feature
-        self.target = target
-    
+    def __init__(self, df:pd.DataFrame, history_len=52):
+        self.df=df
+        self.history_len = history_len
+        self.__read_data__()
+
     def __len__(self):
-        return len(self.feature)
-    
+        return 1
+
+    def __read_data__(self):
+        df = self.df
+        self.data = df
+
     def __getitem__(self,idx):
-        item = self.feature[idx]
-        label = self.target[idx]
+        df = self.df
+        history_len = self.history_len
         
-        return item,label
+        begin = idx
+        pred_x = self.data[begin-history_len:begin]
+
+        return pred_x
