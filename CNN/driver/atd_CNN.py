@@ -24,6 +24,15 @@ class ATD_CNN(object):
         self.model=model
         self.df = df
         return self
+    
+    def update_df(self, new_row):
+        #tmp = self.df.drop(["timeStamps"], axis=1)
+        last_idx=tmp.index[-1]
+        tmp.loc[last_idx+1] = new_row
+        
+        #tmp.insert(0, "timeStamps", tmp.index)
+        self.df = tmp
+        return
 
 
     def _acquire_device(self):
@@ -117,7 +126,7 @@ class ATD_CNN(object):
         for idx, (inputs, mean, std) in enumerate(pred_loader):
             inputs = inputs.unsqueeze(dim=1)
             pred = model(torch.tensor(inputs).to(device).float()).cpu().detach().numpy()
-            
+
             preds.append(pred)
         preds=np.array(preds)
         #print(preds)
