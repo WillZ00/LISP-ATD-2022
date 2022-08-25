@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from torch.utils.data import Dataset,DataLoader
 import gc
+import pandas as pd
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -18,7 +19,7 @@ class atd_dataset(Dataset):
 
     def __read_data__(self):
         df = self.df
-        self.data = df
+        self.data = df.values
 
     
     def __getitem__(self,idx):
@@ -26,8 +27,10 @@ class atd_dataset(Dataset):
         history_len = self.history_len
         
         begin = idx
-        train_x = self.data[begin:begin+history_len]
-        train_y = self.data[begin+history_len:begin+history_len+1]
+        train_x = self.data[begin : begin+history_len]
+        train_y = self.data[begin+history_len : begin+history_len+1]
+
+        #print("check input dim", train_x.shape, train_y.shape)
 
         return train_x, train_y
 
@@ -43,13 +46,14 @@ class atd_Pred(Dataset):
 
     def __read_data__(self):
         df = self.df
-        self.data = df
+        self.data = df.values
 
     def __getitem__(self,idx):
         df = self.df
         history_len = self.history_len
-        
-        begin = idx
-        pred_x = self.data[begin-history_len:begin]
+        #print("history_len", history_len)
+        begin = len(self.data)
+        pred_x = self.data[begin - history_len : begin]
+        #print("check input shape", pred_x.shape)
 
         return pred_x

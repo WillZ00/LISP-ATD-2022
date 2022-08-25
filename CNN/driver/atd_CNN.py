@@ -7,26 +7,28 @@ import time
 import numpy as np
 import pandas as pd
 
-from data.data_loader import atd_dataset
+from data.data_loader import atd_dataset, atd_Pred
 from model.CNN_1D import CNN_ForecastNet
 
 class ATD_CNN(object):
     def __init__(self, args, df:pd.DataFrame):
         self.args = args
         self.device = self._acquire_device()
-        self.ATD_CNN = self._build_model(df)
-        self.model = self.ATD_CNN.to(self.device)
+        self.CNN_ForecastNet = self._build_model(df).model
+        self.model = self.CNN_ForecastNet.to(self.device)
 
     
     def _build_model(self, df):
         self.dim = self.args.dim
-        model = CNN_ForecastNet(dim = self.dim)
-        self.model=model
+        self.history_len=self.args.history_len
+        model = CNN_ForecastNet(dim = self.dim, history_len = self.history_len)
+        self.model = model
         self.df = df
         return self
     
     def update_df(self, new_row):
         #tmp = self.df.drop(["timeStamps"], axis=1)
+        tmp = self.df
         last_idx=tmp.index[-1]
         tmp.loc[last_idx+1] = new_row
         
@@ -52,7 +54,7 @@ class ATD_CNN(object):
         history_len = self.args.history_len
 
         if flag=="train":
-            data_set = atd_dataset(df = self.df, history_len)
+            data_set = atd_dataset(df = self.df,history_len= history_len)
             data_loader = DataLoader(
             data_set,
                 batch_size = self.args.batch_size,
@@ -61,7 +63,7 @@ class ATD_CNN(object):
             )
         else:
             #print("got here")
-            data_set = atd_Pred(df = self.df, history_len)
+            data_set = atd_Pred(df = self.df, history_len = history_len)
             #print(data_set)
             data_loader = DataLoader(
                 data_set,
@@ -96,10 +98,11 @@ class ATD_CNN(object):
                 #labels = labels.unsqueeze(dim=1)
                 inputs = inputs.to(device)
                 labels = labels.to(device)
+                #inputs = inputs.reshape(inputs.shape[0], inputs.shape[2], inputs.shape[1])
                 #print('check input/label dim', inputs.shape, labels.shape)
                 model_optim.zero_grad(set_to_none = True)
                 preds = model(inputs.float())
-                #preds = preds.reshape(labels.shape[0], labels.shape[1])
+                preds = preds.reshape(labels.shape[0], labels.shape[1], labels.shape[2])
                 #print("check shapes_after", preds.shape, labels.shape)
                 loss = criterion(preds,labels)
                 #print(type(train_loss))
@@ -123,8 +126,8 @@ class ATD_CNN(object):
         preds = []
         
         #print(len(pred_loader))
-        for idx, (inputs, mean, std) in enumerate(pred_loader):
-            inputs = inputs.unsqueeze(dim=1)
+        for idx, inputs in enumerate(pred_loader):
+            #inputs = inputs.unsqueeze(dim=1)
             pred = model(torch.tensor(inputs).to(device).float()).cpu().detach().numpy()
 
             preds.append(pred)
