@@ -11,10 +11,11 @@ from data.data_loader import atd_dataset, atd_Pred
 from model.CNN_1D import CNN_ForecastNet
 
 class ATD_CNN(object):
-    def __init__(self, args, df:pd.DataFrame):
+    def __init__(self, args, df:pd.DataFrame, lispStats):
         self.args = args
         self.device = self._acquire_device()
         self.CNN_ForecastNet = self._build_model(df).model
+        self.lispStats = lispStats
         self.model = self.CNN_ForecastNet.to(self.device)
 
     
@@ -54,7 +55,8 @@ class ATD_CNN(object):
         history_len = self.args.history_len
 
         if flag=="train":
-            data_set = atd_dataset(df = self.df,history_len= history_len)
+            lispStats = self.lispStats
+            data_set = atd_dataset(df = self.df,history_len= history_len,lispStats = lispStats)
             data_loader = DataLoader(
             data_set,
                 batch_size = self.args.batch_size,
@@ -63,7 +65,7 @@ class ATD_CNN(object):
             )
         else:
             #print("got here")
-            data_set = atd_Pred(df = self.df, history_len = history_len)
+            data_set = atd_Pred(df = self.df, history_len = history_len, lispStats = lispStats)
             #print(data_set)
             data_loader = DataLoader(
                 data_set,

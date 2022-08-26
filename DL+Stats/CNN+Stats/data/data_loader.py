@@ -8,9 +8,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class atd_dataset(Dataset):
-    def __init__(self, df:pd.DataFrame, history_len=52):
+    def __init__(self, df:pd.DataFrame, history_len=52, lispStats):
         self.df=df
         self.history_len = history_len
+        self.lispStats = lispStats
         self.__read_data__()
 
 
@@ -28,7 +29,8 @@ class atd_dataset(Dataset):
         
         begin = idx
         train_x = self.data[begin : begin+history_len]
-        train_y = self.data[begin+history_len : begin+history_len+1]
+        truth = self.data[begin+history_len : begin+history_len+1]
+        stats_pred = self.lispStats.predict([1,2,3,4]).values
 
         #print("check input dim", train_x.shape, train_y.shape)
 

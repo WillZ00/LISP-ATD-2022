@@ -12,7 +12,7 @@ class VarForecaster:
     def fit(self, df: pd.DataFrame, past_covariates=None):
         self.df = df
         self.training = self._fit_processing(self.df)
-        print(self.training.shape)
+        #print(self.training.shape)
         self.model = VAR(self.training).fit(self.args.lag)
         return self
 
