@@ -14,6 +14,7 @@ class CNN_VAR_Forecaster():
     def fit(self, df:pd.DataFrame, past_covariates=None) -> "CNN_VAR_Forecaster":
         self.df=df
         self.lispStats = VarForecaster(self.args)
+        self.lispStats.fit(df)
 
         lispDL = ATD_CNN(self.args, df, self.lispStats)
         lispDL.train()
@@ -34,8 +35,8 @@ class CNN_VAR_Forecaster():
         forecaster_horizon = len(indicies)
 
         model = self.model
-        if "timeStamps" in self.df.columns:
-            self.df = self.df.drop(["timeStamps"], axis=1)
+        #if "timeStamps" in self.df.columns:
+        #    self.df = self.df.drop(["timeStamps"], axis=1)
 
 
         for j in range(forecaster_horizon):

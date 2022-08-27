@@ -11,26 +11,30 @@ class VarForecaster:
 
     def fit(self, df: pd.DataFrame, past_covariates=None):
         self.df = df
-        self.training = self._fit_processing(self.df)
+        self.training = self._fit_processing(self.df.values)
         #print(self.training.shape)
         self.model = VAR(self.training).fit(self.args.lag)
         return self
 
-    def predict(self, indicies):
-        predict = self.model.forecast(y=self.training[-self.args.lag:], steps=self.args.predict_len)
+    def predict(self, input_x:np.ndarray):
+        #print(input_x.shape)
+        #print(input_x[-self.args.lag:].shape)
+        predict = self.model.forecast(y=input_x[-self.args.lag:], steps=self.args.predict_len)
         predict_back = self._predict_processing(predict)
-        return predict_back[self.df.columns].set_index(indicies)
+        #return predict_back[self.df.columns].set_index(indicies)
+        return predict_back
 
-    def _fit_processing(self, data):
+    def _fit_processing(self, data:np.ndarray, flag='train'):
         if self.args.if_filter_constant:
-            self.constant_columns = data.diff().loc[:, (data.diff().iloc[1:] == 0).all()].columns
-            data = data.drop(self.constant_columns, axis=1)
-            self.not_constant_columns = data.columns
+            if flag=='train':
+                self.constant_columns_idx = np.where(np.all(np.diff(data, axis=0)==0, axis=0))[0]
+                self.not_constant_columns_idx = np.delete(np.arange(data.shape[1]), self.constant_columns_idx)
+                self.constant_predict = data[-self.args.predict_len:, self.constant_columns_idx]
+            #print(data)
+            data = data[:, self.not_constant_columns_idx]
         if self.args.if_normalize:
-            data_proc, self.mean, self.std = self._normalize_data(data)
-        else:
-            data_proc = data
-        return data_proc
+            data, self.mean, self.std = self._normalize_data(data)
+        return data
 
     def _predict_processing(self, data):
         if self.args.if_normalize:
@@ -42,10 +46,9 @@ class VarForecaster:
         data_back[data_back < 0] = 0
 
         if self.args.if_filter_constant:
-            data_back_df = pd.DataFrame(data_back, columns=self.not_constant_columns)
-            data_back_df[self.constant_columns] = self.df.iloc[-self.args.predict_len:][self.constant_columns].values
-            return data_back_df
-        return pd.DataFrame(data_back, columns=self.df.columns)
+            data_back = np.insert(data_back, self.constant_columns_idx - np.arange(len(self.constant_columns_idx)), self.constant_predict, axis=1)
+            return data_back
+        return data_back
 
     def _normalize_data(seft, data):
         data = np.array(data)

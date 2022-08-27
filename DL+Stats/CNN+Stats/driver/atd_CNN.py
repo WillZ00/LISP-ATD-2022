@@ -53,9 +53,9 @@ class ATD_CNN(object):
 
     def _get_data(self, flag:str):
         history_len = self.args.history_len
-
+        lispStats = self.lispStats
         if flag=="train":
-            lispStats = self.lispStats
+            #lispStats = self.lispStats
             data_set = atd_dataset(df = self.df,history_len= history_len,lispStats = lispStats)
             data_loader = DataLoader(
             data_set,
@@ -128,13 +128,18 @@ class ATD_CNN(object):
         preds = []
         
         #print(len(pred_loader))
-        for idx, inputs in enumerate(pred_loader):
+        for idx, (inputs, stats_pred) in enumerate(pred_loader):
             #inputs = inputs.unsqueeze(dim=1)
             pred = model(torch.tensor(inputs).to(device).float()).cpu().detach().numpy()
-
+            stats_pred = stats_pred.numpy().squeeze()
+            #print(stats_pred.shape, pred.shape)
+            #print(stats_pred)
+            #print(pred)
             preds.append(pred)
-        preds=np.array(preds)
-        #print(preds)
-        #preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
+            preds=np.array(preds)
+            preds = np.squeeze(preds)
+            #print(preds.shape)
+            #print(preds)
+            preds = preds+stats_pred
 
         return np.squeeze(preds)
