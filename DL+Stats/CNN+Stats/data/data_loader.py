@@ -33,9 +33,9 @@ class atd_dataset(Dataset):
         truth = self.data[begin+history_len : begin+history_len+1]
         #print("check dtype", (self.data[:begin+history_len]).shape)
         #print("hello")
-        start_time = time.time()
+        #start_time = time.time()
         stats_pred = self.lispStats.predict(self.lispStats._fit_processing(self.data[:begin+history_len], flag='test'))
-        print(time.time()-start_time)
+        #print(time.time()-start_time)
         train_y = truth-stats_pred
 
         #print("check input dim", train_x.shape, train_y.shape)
