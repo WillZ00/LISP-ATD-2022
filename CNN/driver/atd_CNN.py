@@ -77,7 +77,7 @@ class ATD_CNN(object):
         return model_optim
     
     def _select_criterion(self):
-        criterion =  nn.MSELoss()
+        criterion =  nn.L1Loss()
         return criterion
     
     def train(self):
