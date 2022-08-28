@@ -16,15 +16,15 @@ class VarForecaster:
         self.model = VAR(self.training).fit(self.args.lag)
         return self
 
-    def predict(self, input_x:np.ndarray, n_steps = None):
-        if n_steps==None:
-            n_steps = self.args.predict_len
-        predict = self.model.forecast(y=input_x.values[-self.args.lag:], steps=n_steps)
-        predict_back = self._predict_processing(predict)
-        return pd.DataFrame(predict_back, columns=self.df.columns, index=[input_x.index[-1]+1])
+    # def predict(self, input_x:np.ndarray, n_steps = None):
+    #     if n_steps==None:
+    #         n_steps = self.args.predict_len
+    #     predict = self.model.forecast(y=input_x.values[-self.args.lag:], steps=n_steps)
+    #     predict_back = self._predict_processing(predict)
+    #     return pd.DataFrame(predict_back, columns=self.df.columns, index=[input_x.index[-1]+1])
     
         #return predict_back
-    def predict_final(self,indices):
+    def predict(self,indices):
         if n_steps==None:
             n_steps = self.args.predict_len
         predict = self.model.forecast(y=input_x.values[-self.args.lag:], steps=self.args.pred_len)
@@ -49,8 +49,8 @@ class VarForecaster:
         else:
             data_back = data
 
-        data_back = np.round(data_back)
-        data_back[data_back < 0] = 0
+        #data_back = np.round(data_back)
+        #data_back[data_back < 0] = 0
 
         if self.args.if_filter_constant:
             data_back = np.insert(data_back, self.constant_columns_idx - np.arange(len(self.constant_columns_idx)), self.constant_predict, axis=1)
