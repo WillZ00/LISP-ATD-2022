@@ -14,16 +14,25 @@ class CNN_VAR_Forecaster():
     def fit(self, df:pd.DataFrame, past_covariates=None) -> "CNN_VAR_Forecaster":
         self.df=df
         self.lispStats = VarForecaster(self.args)
-        self.lispStats.fit(df)
+        self.lispStats_final = VarForecaster(self.args)
+        self.lispStats_final.fit(df)
+        tmp_df = df.head(len(df//2))
+        tmp_df_np = tmp_df.values
+        self.lispStats.fit(tmp_df)
         pred_df_lst = []
-        for idx in range(len(self.df)-self.args.lag):
-            pred_row = self.lispStats.predict(input_x = self.df.head(self.args.lag+idx), n_steps=1)
+        for idx in range(len(df)//2):
+            pred_row = self.lispStats.predict(input_x = tmp_df_np[:self.args.lag+idx], n_steps=1).set_index(self.df.index[[self.args.lag+idx]])
+            #pred_row = self.lispStats.predict(input_x = self.lispStats.training[:self.args.lag+idx], n_steps=1).set_index(self.df.index[[self.args.lag+idx]])
             pred_df_lst.append(pred_row)
-        pred_df = pd.concat(pred_df_lst, axis=0)
-        truth_df = self.df.tail(len(self.df)-self.args.lag)
+        self.pred_df = pd.concat(pred_df_lst, axis=0)
+        #print(pred_df)
+        self.truth_df = self.df.iloc[self.args.lag:]
         print("stats done")
-        self.res_df = truth_df - pred_df
-        print(res_df)
+        #print("check equal", truth_df.equals(pred_df))
+        self.res_df = self.truth_df.subtract(self.pred_df)
+        #print(self.res_df)
+        # for i in self.res_df.columns:
+        #     print((df[i] == 0).all())
         # pred_df = self.lispStats.predict(input_x = self.df.head(self.args.lag), steps=len(self.df)-self.args.lag)
         # pred_df = pd.concate([self.df.head(self.args.lag), pred_df], axis=0)
         # res_df = self.df-pred_df
@@ -42,14 +51,15 @@ class CNN_VAR_Forecaster():
         #predictions[predictions<=0]=0
         predictions = predictions.to_numpy()
         predictions = pd.DataFrame(data=predictions, index = indicies, columns=self.df.columns)
-        stats_pred = self.lispStats.predict_final(indicies)
+        stats_pred = self.lispStats_final.predict_final(indicies)
         #print(stats_pred.shape)
         #print(predictions.shape)
+        #print(predictions)
         final_pred = stats_pred+predictions
         final_pred[final_pred<=0]=0
         final_pred=final_pred.round()
 
-        return predictions
+        return final_pred
 
     def generate_pred(self, indicies):
         forecaster_horizon = len(indicies)
@@ -63,7 +73,7 @@ class CNN_VAR_Forecaster():
         for j in range(forecaster_horizon):
             #print("got here")
             pred = model.predict()
-            pred = np.round(pred)
+            #pred = np.round(pred)
             model.update_df(pred)
         # pred = model.predict()
         # print(pred)
