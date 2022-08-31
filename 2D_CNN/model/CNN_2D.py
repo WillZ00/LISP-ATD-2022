@@ -121,7 +121,7 @@ class CNN_ForecastNet(nn.Module):
 
         self.gelu = nn.GELU()
 
-        self.self_att = ScaledDotProductAttention(5200, 40, 40, 8)
+        self.self_att = ScaledDotProductAttention(5200, 100, 100, 10)
 
         self.fc2 = nn.Linear(52, 1)
 
