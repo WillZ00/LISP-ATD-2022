@@ -10,6 +10,8 @@ import pandas as pd
 from data.data_loader import atd_dataset, atd_Pred
 from model.CNN_2D import CNN_ForecastNet
 
+torch.manual_seed(123)
+
 class ATD_CNN(object):
     def __init__(self, args, df:pd.DataFrame):
         self.args = args
