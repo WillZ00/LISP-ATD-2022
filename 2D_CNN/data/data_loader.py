@@ -15,7 +15,8 @@ class atd_dataset(Dataset):
 
 
     def __len__(self):
-        return len(self.data)-self.history_len-1
+        #return len(self.data)-self.history_len-1
+        return len(self.data)-self.history_len
         #return 20
 
     def __read_data__(self):

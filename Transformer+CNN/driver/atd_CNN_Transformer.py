@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch import optim
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 import os
 import time
 import numpy as np
@@ -23,16 +24,17 @@ class ATD_CNN_Transformer(object):
     def _build_model(self, df):
         self.dim = self.args.dim
         self.history_len=self.args.history_len
-        model = CNN_Transformer_Net()
+        model = CNN_Transformer_Net(history_len=self.history_len, predict_len=self.args.predict_len)
         self.model = model
         self.df = df
         return self
     
-    def update_df(self, new_row):
+    def update_df(self, new_rows):
         #tmp = self.df.drop(["timeStamps"], axis=1)
         tmp = self.df
-        last_idx=tmp.index[-1]
-        tmp.loc[last_idx+1] = new_row
+        last_idx=tmp.index[-len(new_rows):]
+        new_df = pd.DataFrame(new_rows, index=last_idx+self.args.predict_len, columns=tmp.columns)
+        tmp = pd.concat([tmp, new_df])
         
         #tmp.insert(0, "timeStamps", tmp.index)
         self.df = tmp
@@ -56,7 +58,7 @@ class ATD_CNN_Transformer(object):
         history_len = self.args.history_len
 
         if flag=="train":
-            data_set = atd_dataset(df = self.df,history_len= history_len)
+            data_set = atd_dataset(df = self.df,history_len= history_len, predict_len=self.args.predict_len)
             data_loader = DataLoader(
             data_set,
                 batch_size = self.args.batch_size,
@@ -79,7 +81,7 @@ class ATD_CNN_Transformer(object):
         return model_optim
     
     def _select_criterion(self):
-        criterion =  nn.SmoothL1Loss()
+        criterion =  nn.L1Loss()
         return criterion
     
     def train(self):
@@ -88,23 +90,28 @@ class ATD_CNN_Transformer(object):
         time_now = time.time()
         model_optim = self._select_optimizer()
         criterion = self._select_criterion()
+        scheduler = CosineAnnealingWarmRestarts(model_optim, T_0=20, T_mult=2)
 
         train_loader = self._get_data(flag="train")
         model.train()
         for epoch in range(self.args.train_epochs):
             train_loss=[]
-            for idx, (inputs, labels) in enumerate(train_loader):
+            for idx, (inputs, inputs_1, labels) in enumerate(train_loader):
                 inputs=inputs.to(torch.float32)
+                inptus_1 = inputs_1.to(torch.float32)
                 labels=labels.to(torch.float32)
+
                # print('check input/label dim', inputs.shape, labels.shape)
                 inputs = inputs.unsqueeze(dim=1)
+                inputs_1 = inputs_1.unsqueeze(dim=1)
                 #labels = labels.unsqueeze(dim=1)
                 inputs = inputs.to(device)
+                inputs_1 = inputs_1.to(device)
                 labels = labels.to(device)
                 #inputs = inputs.reshape(inputs.shape[0], inputs.shape[2], inputs.shape[1])
                 #print('check input/label dim', inputs.shape, labels.shape)
                 model_optim.zero_grad(set_to_none = True)
-                preds = model(inputs.float())
+                preds = model(inputs.float(), inputs_1.float())
                 preds = preds.squeeze(dim=1)
                 #preds = preds.reshape(labels.shape[0], labels.shape[1], labels.shape[2])
                 #print("check shapes_after", preds.shape, labels.shape)
@@ -113,6 +120,7 @@ class ATD_CNN_Transformer(object):
                 train_loss.append(loss.item())
                 loss.backward()
                 model_optim.step()
+                scheduler.step()
                 #running_loss += loss
             
             train_loss = np.average(train_loss)
@@ -130,9 +138,10 @@ class ATD_CNN_Transformer(object):
         preds = []
         
         #print(len(pred_loader))
-        for idx, inputs in enumerate(pred_loader):
+        for idx, (inputs, inputs_1)in enumerate(pred_loader):
             inputs = inputs.unsqueeze(dim=1)
-            pred = model(torch.tensor(inputs).to(device).float()).cpu().detach().numpy()
+            inputs_1 = inputs_1.unsqueeze(dim=1)
+            pred = model(torch.tensor(inputs).to(device).float(), torch.tensor(inputs_1).to(device).float()).cpu().detach().numpy()
 
             preds.append(pred)
         preds=np.array(preds)
