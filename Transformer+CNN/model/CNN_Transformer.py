@@ -167,7 +167,7 @@ class CNN_Transformer_Net(nn.Module):
 
         self.fc_x1 = nn.Linear(260, 260)
         self.fc_x2 = nn.Linear(20,20)
-        self.fc2 = nn.Linear(5200,5200)
+        self.fc2 = nn.Linear(2,5200)
 
     def forward(self,x1, x2):
         
@@ -219,12 +219,14 @@ class CNN_Transformer_Net(nn.Module):
         x1 = self.relu(x1)
         x2 = self.relu(x2)
         #print(x1.shape, x2.shape)
-        x = torch.cat([x1, x2], dim=2)
-        
+
+        # x = torch.cat([x1, x2], dim=2)
+        #35,1,4,10400
+        # x = x.reshape(B, x.shape[1], 5200, 2)
+        #print(x.shape)
         # x = x1+x2
-
         # x = self.fc2(x)
-
-
+        # x = x.diagonal(dim1=2,dim2=3)
+        x = x1*x2
 
         return x
