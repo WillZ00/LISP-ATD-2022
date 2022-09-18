@@ -76,6 +76,7 @@ class CNN_Transformer_Net(nn.Module):
         self.fc_x2 = nn.Linear(20,20)
         self.rwl = RowWiseLinear(5200,2)
         self.fc2 = nn.Linear(5200,5200)
+        
 
     def forward(self,x1, x2):
         
@@ -93,8 +94,8 @@ class CNN_Transformer_Net(nn.Module):
         #x2 = x2.reshape(B,260,20, -1)
         # x2 = x2.transpose(2,3)
 
-        x1 = self.positional_encoding_layer_x1(x1)
-        x2 = self.positional_encoding_layer_x2(x2)
+        # x1 = self.positional_encoding_layer_x1(x1)
+        # x2 = self.positional_encoding_layer_x2(x2)
 
         #x1 = self.fc1(x1)
         #x2 = self.fc1(x2)
@@ -142,10 +143,10 @@ class CNN_Transformer_Net(nn.Module):
         x2 = x2.reshape(B, self.predict_len, 5200)
         #print(x1.shape, x2.shape)
 
-        x = torch.concat([x1.unsqueeze(-1),x2.unsqueeze(-1)], dim=-1)
-        x = self.rwl(x)
+        # x = torch.concat([x1.unsqueeze(-1),x2.unsqueeze(-1)], dim=-1)
+        # x = self.rwl(x)
 
-        # x = x1+x2
+        x = x1+x2
         # x = self.fc2(x)
         
 
