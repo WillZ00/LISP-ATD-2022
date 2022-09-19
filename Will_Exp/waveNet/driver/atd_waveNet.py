@@ -9,11 +9,11 @@ import numpy as np
 import pandas as pd
 
 from data.data_loader import atd_dataset, atd_Pred
-from model.WaveNet import WaveNet
+from model.waveNet import WaveNet
 
 torch.manual_seed(123)
 
-class ATD_CNN_Transformer(object):
+class ATD_waveNet(object):
     def __init__(self, args, df:pd.DataFrame):
         self.args = args
         self.device = self._acquire_device()
@@ -27,7 +27,7 @@ class ATD_CNN_Transformer(object):
         hparams = {
                 "nb_layers":5,
                 "kernel_size":2,
-                "nb_filters":20
+                "nb_filters":300
             }
         model = WaveNet(hparams, in_channels=5200)
         self.model = model
@@ -86,7 +86,7 @@ class ATD_CNN_Transformer(object):
         return model_optim
     
     def _select_criterion(self):
-        criterion =  nn.L1Loss()
+        criterion =  nn.MSELoss()
         return criterion
     
     def train(self):

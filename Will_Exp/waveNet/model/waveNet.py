@@ -57,10 +57,20 @@ class WaveNet(nn.Module):
         self.output_layer.apply(weights_init)
         self.leaky_relu = nn.LeakyReLU(0.1)
 
+        self.fc = nn.Linear(5200,5200)
+        self.batch_norm1d = nn.BatchNorm1d(num_features=35)
+        self.dropout = nn.Dropout(p=0.25)
+
     def forward(self, x):
+        x = self.batch_norm1d(x)
+        x=x.permute(0,2,1)
         for dilated_causal_conv in self.dilated_causal_convs:
             #print(x.shape)
             x = dilated_causal_conv(x)
-            print(x.shape)
+            x = self.dropout(x)
+            #print(x.shape)
         x = self.leaky_relu(self.output_layer(x))
+        x = x.permute(0,2,1)
+
+        x = self.fc(x)
         return x
