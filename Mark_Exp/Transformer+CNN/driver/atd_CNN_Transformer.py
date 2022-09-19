@@ -82,6 +82,7 @@ class ATD_CNN_Transformer(object):
     
     def _select_criterion(self):
         criterion =  nn.L1Loss()
+        # criterion =  nn.MSELoss()
         return criterion
     
     def train(self):
@@ -120,7 +121,8 @@ class ATD_CNN_Transformer(object):
                 train_loss.append(loss.item())
                 loss.backward()
                 model_optim.step()
-                scheduler.step()
+                if self.args.if_scheduler:
+                    scheduler.step()
                 #running_loss += loss
             
             train_loss = np.average(train_loss)
@@ -145,7 +147,7 @@ class ATD_CNN_Transformer(object):
 
             preds.append(pred)
         preds=np.array(preds)
-        #print(preds)
+        # print(np.squeeze(preds).shape)
         #preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
 
         return np.squeeze(preds)

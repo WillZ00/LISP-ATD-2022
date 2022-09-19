@@ -36,6 +36,7 @@ class CNN_Transformer_Forecaster():
         for j in range(int(forecaster_horizon/self.args.predict_len)):
             pred = model.predict()
             pred = np.round(pred)
+            pred = pred.reshape(self.args.predict_len, 5200)
             model.update_df(pred)
         # pred = model.predict()
         # print(pred)
@@ -68,7 +69,7 @@ class CNN_Transformer_Forecaster():
 
         if self.args.if_filter_constant:
             data_back_df = pd.DataFrame(data_back, columns=self.df.columns)
-            data_back_df[self.constant_columns] = self.df.iloc[-self.args.predict_len:][self.constant_columns].values
+            data_back_df[self.constant_columns] = self.df.iloc[-4:][self.constant_columns].values
             return data_back_df
         return pd.DataFrame(data_back, columns=self.df.columns)
 

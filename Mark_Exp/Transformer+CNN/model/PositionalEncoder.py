@@ -43,6 +43,6 @@ class PositionalEncoder(nn.Module):
             x: Tensor, shape [batch_size, enc_seq_len, dim_val] or 
                [enc_seq_len, batch_size, dim_val]
         """
-        x = x + self.pe[:x.size(2)]
+        x = x + self.pe[:x.size(1)]
 
         return self.dropout(x)
