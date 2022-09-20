@@ -112,7 +112,7 @@ class ATD_ST_CNN(object):
                 #print('check input/label dim', inputs.shape, labels.shape)
                 model_optim.zero_grad(set_to_none = True)
                 preds = model(inputs.float())
-                preds = preds.squeeze(dim=1)
+                #preds = preds.squeeze(dim=1)
                 #preds = preds.reshape(labels.shape[0], labels.shape[1], labels.shape[2])
                 #print("check shapes_after", preds.shape, labels.shape)
                 loss = criterion(preds,labels)
