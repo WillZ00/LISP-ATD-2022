@@ -63,7 +63,7 @@ class ATD_CNN_Transformer(object):
             data_set,
                 batch_size = self.args.batch_size,
                 shuffle=False,
-                drop_last=True
+                drop_last=False
             )
         else:
             #print("got here")
@@ -73,7 +73,7 @@ class ATD_CNN_Transformer(object):
                 data_set,
                 batch_size = 1,
                 shuffle=False,
-                drop_last=True
+                drop_last=False
             )
         return data_loader
     def _select_optimizer(self):
@@ -99,7 +99,7 @@ class ATD_CNN_Transformer(object):
             train_loss=[]
             for idx, (inputs, inputs_1, labels) in enumerate(train_loader):
                 inputs=inputs.to(torch.float32)
-                inptus_1 = inputs_1.to(torch.float32)
+                inputs_1 = inputs_1.to(torch.float32)
                 labels=labels.to(torch.float32)
 
                # print('check input/label dim', inputs.shape, labels.shape)

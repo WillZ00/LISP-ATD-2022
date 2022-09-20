@@ -58,9 +58,8 @@ class atd_Pred(Dataset):
         df = self.df
         history_len = self.history_len
         #print("history_len", history_len)
-        begin = len(self.data)
-        pred_x = self.data[begin - history_len : begin]
-        pred_x1 = self.data_1[begin - history_len : begin]
+        pred_x = self.data[ - history_len :]
+        pred_x1 = self.data_1[- history_len : ]
         #print("check input shape", pred_x.shape)
 
         return pred_x, pred_x1

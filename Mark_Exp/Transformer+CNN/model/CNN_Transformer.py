@@ -24,24 +24,21 @@ class RowWiseLinear(nn.Module):
         return w_times_x.squeeze()
 
 
-# class EMA(nn.Module):
-#     def __init__(self, in_size, out_size):
-#         super().__init__()
-#         self.in_size = in_size
-#         self.out_size = out_size
-#         self.lambda_ = nn.Parameter(torch.ones(1))
-#         self.register_parameter('lambda_', self.lambda_)
-#         a = (torch.exp(self.lambda_) - 1)/(torch.exp(self.lambda_) - torch.exp(-self.lambda_*(self.in_size-1)))
-#         weights = torch.exp(-torch.arange(0, in_size)*self.lambda_)*a
-#         weights = weights.reshape(in_size, 1)
-#         self.register_buffer('weights', weights)
+class EMA(nn.Module):
+    def __init__(self, in_size, out_size):
+        super().__init__()
+        self.in_size = in_size
+        self.out_size = out_size
+        self.lambda_ = nn.Parameter(torch.ones(1))
+        self.register_parameter('lambda_', self.lambda_)
 
         
-#     def forward(self, x):
-#         for i in range(self.out_size):
-#              new_x = torch.matmul(x[:,:,:,-self.in_size:], self.weights)
-#              x = torch.concat([x, new_x], dim = -1)
-#         return x[:,:,:,-self.out_size:]
+    def forward(self, x):
+        weights = (torch.exp(-(torch.arange(0, self.in_size)).to('cuda')*self.lambda_)*(torch.exp(self.lambda_) - 1)/(torch.exp(self.lambda_) - torch.exp(-self.lambda_*(self.in_size-1)))).reshape(self.in_size, 1).to('cuda')
+        for i in range(self.out_size):
+             new_x = torch.matmul(x[:,:,:,-self.in_size:], weights)
+             x = torch.concat([x, new_x], dim = -1)
+        return x[:,:,:,-self.out_size:]
 
 
 class MLP(torch.nn.Module): 
@@ -56,6 +53,18 @@ class MLP(torch.nn.Module):
         x = self.relu(self.fc1(x))
         x = self.relu(self.fc2(x))
         x = self.fc3(x)
+        return x
+
+class MLP1(torch.nn.Module): 
+    def __init__(self, in_channel, hidden_channel, out_channel):
+        super(MLP1,self).__init__() 
+        self.relu = nn.ReLU(inplace=True)
+        self.fc1 = torch.nn.Linear(in_channel, hidden_channel)  # 第一个隐含层  
+        self.fc2 = torch.nn.Linear(hidden_channel, out_channel)   # 输出层
+        
+    def forward(self,x):
+        x = self.relu(self.fc1(x))
+        x = self.fc2(x)
         return x
 
 
@@ -106,6 +115,8 @@ class CNN_Transformer_Net(nn.Module):
         self.batch_norm2d_x1 = nn.BatchNorm2d(num_features=20)
         self.batch_norm2d_x2 = nn.BatchNorm2d(num_features=260)
 
+        self.batch_norm2d = nn.BatchNorm2d(num_features=520)
+
         self.layernorm = nn.LayerNorm((self.history_len,20))
         self.layernorm_x1 = nn.LayerNorm(260)
         self.layernorm_x2 = nn.LayerNorm(20)
@@ -142,10 +153,11 @@ class CNN_Transformer_Net(nn.Module):
         
         self.fc_x1 = nn.Linear(260, 260)
         self.fc_x2 = nn.Linear(20,20)
-        self.rwl = RowWiseLinear(5200,2)
+        # self.rwl = RowWiseLinear(5200,2)
         self.fc2 = nn.Linear(5200,5200)
         self.MLP = MLP(2080, 1040, 520, 260)
-        # self.EMA = EMA(self.history_len, self.predict_len)
+        self.MLP1 = MLP1(520, 260, 260)
+        self.EMA = EMA(self.history_len, self.predict_len)
 
         self.fc_var = nn.Linear(self.history_len*5200, 5200)
     
@@ -155,7 +167,6 @@ class CNN_Transformer_Net(nn.Module):
     #     x = x1.reshape(B, self.history_len * 5200)
     #     x = self.fc_var(x)
     #     x = x.reshape(B, 1, 5200)
-
     #     return x
 
 
@@ -172,13 +183,13 @@ class CNN_Transformer_Net(nn.Module):
         x = self.layernorm(x)
         x = x + self.relu(x)
 
-        x = self.conv2d_2(x)
-        x = self.layernorm(x)
-        x = x + self.relu(x)
+        # x = self.conv2d_2(x)
+        # x = self.layernorm(x)
+        # x = x + self.relu(x)
 
-        x = self.conv2d_3(x)
-        x = self.layernorm(x)
-        x = x + self.relu(x)
+        # x = self.conv2d_3(x)
+        # x = self.layernorm(x)
+        # x = x + self.relu(x)
 
         # x: B, 2080, his_l, 20
 
@@ -192,6 +203,7 @@ class CNN_Transformer_Net(nn.Module):
 
         x = self.fc1(x)
         # x = self.EMA(x)
+        # x = x[:,:,:,-self.predict_len:]
 
         # # x: B, 2080, 20, pred_l
 
@@ -199,7 +211,8 @@ class CNN_Transformer_Net(nn.Module):
 
         # x: B, pred_l, 20, 2080
 
-        x = self.MLP(x)
+        # x = self.MLP(x)
+        x = self.MLP1(x)
 
         # x: B, pred_l, 20, 260
 
