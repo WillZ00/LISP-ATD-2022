@@ -63,7 +63,7 @@ class ATD_ST_CNN(object):
             data_set,
                 batch_size = self.args.batch_size,
                 shuffle=False,
-                drop_last=True
+                drop_last=False
             )
         else:
             #print("got here")
@@ -73,7 +73,7 @@ class ATD_ST_CNN(object):
                 data_set,
                 batch_size = 1,
                 shuffle=False,
-                drop_last=True
+                drop_last=False
             )
         return data_loader
     def _select_optimizer(self):
@@ -81,7 +81,7 @@ class ATD_ST_CNN(object):
         return model_optim
     
     def _select_criterion(self):
-        criterion =  nn.L1Loss()
+        criterion =  nn.MSELoss()
         return criterion
     
     def train(self):
