@@ -3,8 +3,8 @@ from torch import nn
 from torch.utils.data import Dataset,DataLoader
 from statsmodels.tsa.api import VAR
 import gc
-from model.SelfAttention import ScaledDotProductAttention
-from model.PositionalEncoder import PositionalEncoder
+from Event_Time_CNN.model.SelfAttention import ScaledDotProductAttention
+from Event_Time_CNN.model.PositionalEncoder import PositionalEncoder
 
 class RowWiseLinear(nn.Module):
     def __init__(self, height, width):

@@ -8,8 +8,8 @@ import time
 import numpy as np
 import pandas as pd
 
-from data.data_loader import atd_dataset, atd_Pred
-from model.ET_CNN import ET_CNN_Net
+from Event_Time_CNN.data.data_loader import atd_dataset, atd_Pred
+from Event_Time_CNN.model.ET_CNN import ET_CNN_Net
 
 torch.manual_seed(123)
 

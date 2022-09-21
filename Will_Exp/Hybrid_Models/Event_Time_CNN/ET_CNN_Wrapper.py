@@ -2,8 +2,8 @@ import atd2022
 import torch
 import numpy as np
 import pandas as pd
-from driver.atd_ET_CNN import ATD_ET_CNN
-from utils.tools import dotdict
+from Event_Time_CNN.driver.atd_ET_CNN import ATD_ET_CNN
+from Event_Time_CNN.utils.tools import dotdict
 
 class ET_CNN_Forecaster():
 
