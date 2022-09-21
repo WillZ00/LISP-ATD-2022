@@ -6,12 +6,13 @@ from atd2022.forecasters import PredictMeanForecaster, PredictLastForecaster, Ex
 from CNN_Transformer_Forecaster_Wrapper import CNN_Transformer_Forecaster
 #from ET_CNN_Wrapper import ET_CNN_Forecaster
 #from CoAtNet.CoAtNet_Forecaster_Wrapper import CoAtNet_Forecaster
+import gc
 
 
 class MultiForecaster:
 
     def __init__(self, args: dotdict):
-        self.df = None
+        self.df = Nonegit 
         self.args = args
         self.model_name_dict = {
             'var':VarForecaster, 
@@ -37,4 +38,6 @@ class MultiForecaster:
         for model in self.model_list:
             predict = model.predict(indicies)
             predict_sum += predict
+        del self.model_list[:]
+        gc.collect()
         return (predict_sum/len(self.model_list)).round()

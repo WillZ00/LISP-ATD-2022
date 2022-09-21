@@ -4,7 +4,7 @@ from utils.tools import dotdict
 from var_forecaster import VarForecaster
 from atd2022.forecasters import PredictMeanForecaster, PredictLastForecaster, ExponentiallyWeightedMovingAverage
 from CNN_Transformer_Forecaster_Wrapper import CNN_Transformer_Forecaster
-
+import gc
 
 class MultiForecaster:
 
@@ -29,4 +29,6 @@ class MultiForecaster:
         for model in self.model_list:
             predict = model.predict(indicies)
             predict_sum += predict
+        del self.model_list[:]
+        gc.collect()
         return (predict_sum/len(self.model_list)).round()
