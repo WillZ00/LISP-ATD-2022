@@ -34,10 +34,11 @@ class MultiForecaster:
         return self
 
     def predict(self, indicies):
+        self.len = len(self.model_list)
         predict_sum = pd.DataFrame(0, columns=self.df.columns, index=indicies)
         for model in self.model_list:
             predict = model.predict(indicies)
             predict_sum += predict
         del self.model_list[:]
         gc.collect()
-        return (predict_sum/len(self.model_list)).round()
+        return (predict_sum/self.len).round()
