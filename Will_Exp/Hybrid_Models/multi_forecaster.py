@@ -5,6 +5,7 @@ from var_forecaster import VarForecaster
 from atd2022.forecasters import PredictMeanForecaster, PredictLastForecaster, ExponentiallyWeightedMovingAverage
 #from CNN_Transformer_Forecaster_Wrapper import CNN_Transformer_Forecaster
 from Event_Time_CNN.ET_CNN_Wrapper import ET_CNN_Forecaster
+from CoAtNet.CoAtNet_Forecaster_Wrapper import CoAtNet_Forecaster
 
 
 class MultiForecaster:
@@ -15,6 +16,7 @@ class MultiForecaster:
         self.model_name_dict = {
             'var':VarForecaster, 
             'ET_CNN': ET_CNN_Forecaster, 
+            'CoAtNet': CoAtNet_Forecaster,
             'pmf':PredictMeanForecaster,
             'plf':PredictLastForecaster, 
             'EWMA':ExponentiallyWeightedMovingAverage}
