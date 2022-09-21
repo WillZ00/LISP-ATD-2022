@@ -12,7 +12,7 @@ import gc
 class MultiForecaster:
 
     def __init__(self, args: dotdict):
-        self.df = Nonegit 
+        self.df = None
         self.args = args
         self.model_name_dict = {
             'var':VarForecaster, 
