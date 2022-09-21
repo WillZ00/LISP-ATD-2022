@@ -63,7 +63,7 @@ class CoAtNet(nn.Module):
         self.mlp3=nn.Sequential(
             nn.Linear(out_chs[2],out_chs[3]),
             nn.ReLU(),
-            nn.Linear(out_chs[3],out_chs[3])
+            nn.Linear(out_chs[3],out_chs[4])
         )
 
         self.s4=ScaledDotProductAttention(out_chs[3],out_chs[3]//6,out_chs[3]//6,6)
@@ -94,8 +94,8 @@ class CoAtNet(nn.Module):
         y=self.mlp1(self.s1(y))
         y=self.maxpool2d(y)
         #stage2
-        y=self.mlp2(self.s2(y))
-        #y = self.mlp2(y)
+        #y=self.mlp2(self.s2(y))
+        y = self.mlp2(y)
         y=self.maxpool2d(y)
         #stage3
         y=y.reshape(B,self.out_chs[2],-1).permute(0,2,1) #B,N,C
@@ -104,7 +104,7 @@ class CoAtNet(nn.Module):
         #print(y.shape)
         #stage4
         #y=self.mlp4(self.s4(y,y,y))
-        y = self.mlp4(y)
+        #y = self.mlp4(y)
         y=self.maxpool1d(y.permute(0,2,1))
         N=y.shape[-1]
         y=y.reshape(B,self.out_chs[4],int(sqrt(N)),int(sqrt(N)))
