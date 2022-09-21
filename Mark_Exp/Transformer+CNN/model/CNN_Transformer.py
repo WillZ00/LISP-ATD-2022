@@ -57,6 +57,7 @@ class MLP(torch.nn.Module):
         x = self.fc3(x)
         return x
 
+
 class MLP1(torch.nn.Module): 
     def __init__(self, in_channel, hidden_channel, out_channel):
         super(MLP1,self).__init__() 
@@ -151,27 +152,27 @@ class CNN_Transformer_Net(nn.Module):
     def forward(self,x1, x2):
         # x1: B, 1, his_l, 5200(260*20)
         # x2: B, 1, his_l, 5200(20*260)
-        x = x1
-        
-        B,C,H,W = x.shape
+        B,C,H,W = x1.shape
 
-        x = x.reshape(B, self.history_len, 260, 20).transpose(1,2)
-        
-        x = self.conv2d_1(x)
+        x1 = x1.reshape(B, self.history_len, 260, 20).transpose(1,2)
+
+        x = self.conv2d_1(x1)
         x = self.layernorm(x)
-        x = x + self.relu(x)
+        x = x+ self.relu(x)
 
         # x: B, 520, his_l, 20
 
-        # x_1 = self.conv2d_2(x2.reshape(B, self.history_len, 20, 260).transpose(1,2))
+        x_2 = self.conv2d_3(x2)
+        x_2 = self.layernorm2(x_2)
+        x_2 = x_2 + self.relu(x_2)
+
+        # x2 = x2.reshape(B, self.history_len, 20, 260).transpose(1,2)
+
+        # x_1 = self.conv2d_2(x2)
         # x_1 = self.layernorm_1(x_1)
         # x_1 = x_1 + self.relu(x_1)
-
-        x2 = self.conv2d_3(x2)
-        x2 = self.layernorm2(x2)
-        x2= x2 + self.relu(x2)
         # # x2:B, 260, his_l, 20
-        x = torch.concat([x, x2], dim=1)
+        x = torch.concat([x, x_2], dim=1)
 
         x = x.transpose(2,3)
 
