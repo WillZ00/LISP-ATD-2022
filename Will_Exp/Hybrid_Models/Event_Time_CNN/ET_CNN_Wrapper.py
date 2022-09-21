@@ -17,12 +17,14 @@ class ET_CNN_Forecaster():
         exp = ATD_ET_CNN(self.args, self.training)
         exp.train()
         self.model = exp
+        torch.cuda.empty_cache()
         return self
 
 
     def predict(self, indicies):
         predictions = self.generate_pred(indicies)
         predictions_df = self._predict_processing(predictions.values)
+        torch.cuda.empty_cache()
         return predictions_df.set_index(indicies)
 
     def generate_pred(self, indicies):
