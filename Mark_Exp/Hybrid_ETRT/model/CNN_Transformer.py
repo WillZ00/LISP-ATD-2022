@@ -6,6 +6,7 @@ from statsmodels.tsa.api import VAR
 import gc
 from model.SelfAttention import ScaledDotProductAttention
 from model.PositionalEncoder import PositionalEncoder
+from model.CoAtnet_Transformer import Transformer
 
 class RowWiseLinear(nn.Module):
     def __init__(self, height, width):
@@ -83,13 +84,6 @@ class CNN_Transformer_Net(nn.Module):
             kernel_size =(3, 3), 
             padding= 1,
             stride = 1)
-
-        self.conv2d_2 = nn.Conv2d(
-            in_channels=20, 
-            out_channels=260,
-            kernel_size =(3, 13), 
-            padding= (1,0),
-            stride = (1,13))
         
         self.conv2d_3 = nn.Conv2d(
             in_channels=1, 
@@ -98,41 +92,42 @@ class CNN_Transformer_Net(nn.Module):
             padding= (1,0),
             stride = (1,260))
 
+        self.transformer = Transformer(260, 520, (history_len, 20), heads=13, dim_head=20, downsample=True)
+
         
 
         self.fc1 = nn.Linear(history_len, predict_len)
         self.relu = nn.ReLU(inplace=True)
 
-        self.cnn_mlp=nn.Sequential(
-            nn.Conv2d(self.history_len,self.predict_len,kernel_size=3,padding=1),
-            nn.ReLU(),
-            nn.Conv2d(self.predict_len,self.predict_len,kernel_size=3,padding=1)
-        )
+        # self.cnn_mlp=nn.Sequential(
+        #     nn.Conv2d(self.history_len,self.predict_len,kernel_size=3,padding=1),
+        #     nn.ReLU(),
+        #     nn.Conv2d(self.predict_len,self.predict_len,kernel_size=3,padding=1)
+        # )
 
-        self.batch_norm2d = nn.BatchNorm2d(num_features=520)
+        # self.batch_norm2d = nn.BatchNorm2d(num_features=520)
 
         self.layernorm = nn.LayerNorm((self.history_len,20))
         self.layernorm2 = nn.LayerNorm((self.history_len,20))
-        self.layernorm_1 = nn.LayerNorm((self.history_len,20))
 
-        self.transEncoder = nn.TransformerEncoderLayer(
-            d_model=260,
-            nhead=20, 
-            dim_feedforward=2048,
-            batch_first=True)
+        # self.transEncoder = nn.TransformerEncoderLayer(
+        #     d_model=260,
+        #     nhead=20, 
+        #     dim_feedforward=2048,
+        #     batch_first=True)
 
-        self.positional_encoding_layer_x1 = PositionalEncoder(
-            dropout=0.01,
-            d_model = 20,
-            batch_first = True,
-            max_seq_len=10000
-        )
-        self.positional_encoding_layer_x2 = PositionalEncoder(
-            dropout=0.01,
-            d_model = 260,
-            batch_first = True,
-            max_seq_len=10000
-        )
+        # self.positional_encoding_layer_x1 = PositionalEncoder(
+        #     dropout=0.01,
+        #     d_model = 20,
+        #     batch_first = True,
+        #     max_seq_len=10000
+        # )
+        # self.positional_encoding_layer_x2 = PositionalEncoder(
+        #     dropout=0.01,
+        #     d_model = 260,
+        #     batch_first = True,
+        #     max_seq_len=10000
+        # )
         
         # self.rwl = RowWiseLinear(5200,2)
         self.MLP = MLP(2080, 1040, 520, 260)
@@ -162,9 +157,10 @@ class CNN_Transformer_Net(nn.Module):
 
         # x: B, 520, his_l, 20
 
-        x_2 = self.conv2d_3(x2)
-        x_2 = self.layernorm2(x_2)
-        x_2 = x_2 + self.relu(x_2)
+        # x_2 = self.conv2d_3(x2)s
+        # x_2 = self.layernorm2(x_2)
+        # x_2 = x_2 + self.relu(x_2)
+        x_2 = self.transformer(x1)
 
         # x2 = x2.reshape(B, self.history_len, 20, 260).transpose(1,2)
 

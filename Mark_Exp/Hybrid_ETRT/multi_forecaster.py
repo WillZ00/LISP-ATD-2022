@@ -17,6 +17,7 @@ class MultiForecaster:
                                 'plf':PredictLastForecaster, 'EWMA':ExponentiallyWeightedMovingAverage}
         self.model_list = []
 
+
     def fit(self, df: pd.DataFrame, past_covariates=None):
         self.df = df
         for i, model_name in enumerate(self.args.model_list):
@@ -27,11 +28,12 @@ class MultiForecaster:
         return self
 
     def predict(self, indicies):
-        self.len = len(self.model_list)
+        if not self.args.model_weights:
+            self.args.model_weights = np.ones(len(self.args.model_list))/len(self.args.model_list)
         predict_sum = pd.DataFrame(0, columns=self.df.columns, index=indicies)
-        for model in self.model_list:
+        for i, model in enumerate(self.model_list):
             predict = model.predict(indicies)
-            predict_sum += predict
+            predict_sum += self.args.model_weights[i]*predict
         del self.model_list[:]
         gc.collect()
-        return (predict_sum/self.len).round()
+        return predict_sum.round()
