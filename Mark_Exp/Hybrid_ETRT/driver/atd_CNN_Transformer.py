@@ -88,7 +88,6 @@ class ATD_CNN_Transformer(object):
     def train(self):
         model =self.model
         device = self.device
-        time_now = time.time()
         model_optim = self._select_optimizer()
         criterion = self._select_criterion()
         scheduler = CosineAnnealingWarmRestarts(model_optim, T_0=20, T_mult=2)

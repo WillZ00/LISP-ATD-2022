@@ -1,4 +1,5 @@
 from operator import concat
+import time
 import torch
 from torch import nn
 from torch.utils.data import Dataset,DataLoader
@@ -85,14 +86,23 @@ class CNN_Transformer_Net(nn.Module):
             padding= 1,
             stride = 1)
         
-        self.conv2d_3 = nn.Conv2d(
-            in_channels=1, 
+        self.conv2d_2 = nn.Conv2d(
+            in_channels=260, 
             out_channels=520,
-            kernel_size =(3, 260), 
+            kernel_size =(3, 1), 
             padding= (1,0),
-            stride = (1,260))
+            stride = 1)
+        
+        self.conv2d_3 = nn.Conv2d(
+            in_channels=20, 
+            out_channels=40,
+            kernel_size =(3, 3), 
+            padding= (1,1),
+            stride = 1)
+        
+            
 
-        self.transformer = Transformer(260, 520, (history_len, 20), heads=13, dim_head=20, downsample=True)
+        # self.transformer = Transformer(20, 20, (1, 260), heads=4, dim_head=5, downsample=False)
 
         
 
@@ -109,10 +119,15 @@ class CNN_Transformer_Net(nn.Module):
 
         self.layernorm = nn.LayerNorm((self.history_len,20))
         self.layernorm2 = nn.LayerNorm((self.history_len,20))
+        self.layernorm3 = nn.LayerNorm((self.history_len,260))
 
-        # self.transEncoder = nn.TransformerEncoderLayer(
-        #     d_model=260,
-        #     nhead=20, 
+        self.transEncoder = nn.TransformerEncoderLayer(
+            d_model=self.history_len, 
+            nhead=2)
+
+        # self.transEncoderLaryer = nn.TransformerEncoderLayer(
+        #     d_model=20,
+        #     nhead=2, 
         #     dim_feedforward=2048,
         #     batch_first=True)
 
@@ -129,10 +144,12 @@ class CNN_Transformer_Net(nn.Module):
         #     max_seq_len=10000
         # )
         
-        # self.rwl = RowWiseLinear(5200,2)
-        self.MLP = MLP(2080, 1040, 520, 260)
-        self.MLP1 = MLP1(1040, 520, 260)
-        self.EMA = EMA(self.history_len, self.predict_len)
+        
+        # self.MLP = MLP(2080, 1040, 520, 260)
+        self.MLP1 = MLP1(520, 520, 260)
+        self.MLP3 = MLP1(40, 20, 20)
+        self.rwl = RowWiseLinear(5200,2)
+        # self.EMA = EMA(self.history_len, self.predict_len)
         # self.fc_var = nn.Linear(self.history_len*5200, 5200)
     
     # def forward(self,x1, x2):
@@ -150,52 +167,66 @@ class CNN_Transformer_Net(nn.Module):
         B,C,H,W = x1.shape
 
         x1 = x1.reshape(B, self.history_len, 260, 20).transpose(1,2)
+        x2 = x2.reshape(B, self.history_len, 20, 260).transpose(1,2)
 
+        
         x = self.conv2d_1(x1)
         x = self.layernorm(x)
         x = x+ self.relu(x)
 
         # x: B, 520, his_l, 20
 
-        # x_2 = self.conv2d_3(x2)s
+        # x_2 = self.conv2d_2(x1)
         # x_2 = self.layernorm2(x_2)
         # x_2 = x_2 + self.relu(x_2)
-        x_2 = self.transformer(x1)
+        # x_2: B, 520, his_l, 20th
+        
+        x_3 = x2.transpose(2,3).reshape(B*20, 260, self.history_len)
+        # x_3 = self.transEncoder(x_3)
+        x_3 = x_3.reshape(B, 20, 260, self.history_len).transpose(2,3)
+        # x_3: B, 20, his_l, 260
 
-        # x2 = x2.reshape(B, self.history_len, 20, 260).transpose(1,2)
+        x_3 = self.conv2d_3(x_3)
+        x_3 = self.layernorm3(x_3)
+        x_3 = x_3 + self.relu(x_3)
+        # x_3: B, 40, his_l, 260
 
-        # x_1 = self.conv2d_2(x2)
-        # x_1 = self.layernorm_1(x_1)
-        # x_1 = x_1 + self.relu(x_1)
-        # # x2:B, 260, his_l, 20
-        x = torch.concat([x, x_2], dim=1)
+        # x = torch.concat([x, x_2, x_3], dim=1)
 
         x = x.transpose(2,3)
+        x_3 = x_3.transpose(2,3)
 
-        # x: B, 2080, 20, his_l
+        # x: B, 1040, 20, his_l
 
         # x = x.permute(0,2,3,1).reshape(B, 20*self.history_len, -1)
         # x = self.transEncoder(x)
         # x = x.reshape((B, 20, self.history_len, -1)).permute(0,3,1,2)
 
         x = self.fc1(x)
+        x_3 = self.fc1(x_3)
         # x = self.EMA(x)
 
         # x = x.permute(0,3,1,2)
         # x = self.cnn_mlp(x)
         # x = x.permute(0,2,3,1)
 
-        # # x: B, 2080, 20, pred_l
+        # # x: B, 1040, 20, pred_l
 
         x = x.permute(0,3,2,1)
+        x_3 = x_3.permute(0,3,2,1)
 
-        # x: B, pred_l, 20, 2080
+
+        # x: B, pred_l, 20, 1040
+        # x_3: B, pred_l, 260, 40
 
         # x = self.MLP(x)
         x = self.MLP1(x)
+        x_3 = self.MLP3(x_3)
 
         # x: B, pred_l, 20, 260
-
         x = x.transpose(2,3).reshape(B, self.predict_len, 5200)
-
+        x_3 = x_3.reshape(B, self.predict_len, 5200)
+        
+        x = torch.concat([x.unsqueeze(-1), x_3.unsqueeze(-1)], dim=-1)
+        x = self.rwl(x)
         return x
